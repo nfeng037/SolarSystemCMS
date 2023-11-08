@@ -1,0 +1,121 @@
+/* Reset some default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    background-color: #000;
+    color: #fff;
+  }
+  
+  main {
+    height: 80vh; 
+  }
+  
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+    padding: 1rem;
+  }
+  
+  nav ul {
+    list-style-type: none;
+    display: flex;
+  }
+  
+  nav ul li {
+    padding: 0 1rem;
+  }
+  
+  nav ul li a {
+    color: #fff;
+    text-decoration: none;
+  }
+  
+  .search input[type="search"] {
+    padding: 0.5rem;
+  }
+  
+  .search button {
+    padding: 0.5rem;
+    background-color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .intro {
+    background: url('./images/space-background.png') no-repeat center center;
+    background-size: cover;
+    color: #fff;
+    text-align: center;
+    height: 60%;
+    border-top: 1px white solid;
+    border-bottom: 1px white solid;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; 
+    justify-content: center; 
+    text-align: left; 
+    padding-left: 10%;
+  }
+  
+  .intro h1, .intro p {
+    max-width: 50%; 
+    margin-bottom: 20px;
+  }
+  
+  .intro button {
+    padding: 10px;
+    border-radius: 20px;
+  }
+  
+  .gallery h2 {
+    color: white;
+    margin: 20px 0px 0px 35px;
+  }
+  
+  h3 {
+    font-size: 16px;
+  }
+  
+  .gallery {
+    display: flex;
+    flex-direction: column; 
+    justify-content: flex-start; 
+  }
+  
+  .article-container {
+    display: flex;
+    flex-direction: row; 
+    justify-content: space-around; 
+    flex-wrap: wrap; 
+  }
+  
+  
+  .gallery article {
+    color: white;
+    width: 150px;
+    font-size: 12px;
+    margin: 1rem;
+    text-align: left;
+  }
+  
+  .gallery img {
+    width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+    border: 1px white solid;
+    border-radius: 15px;
+  }
+  
+  footer {
+    color: #fff;
+    text-align: center;
+    padding: 1rem;
+  }
+  
