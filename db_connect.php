@@ -1,6 +1,6 @@
 <?php
 $host = 'localhost'; // Host name
-$db   = 'planet_cms'; // Database name
+$db   = 'SolarSystemCMS'; // Database name
 $user = 'root'; // Database user
 $pass = ''; // Database password
 $charset = 'utf8mb4'; // Database character set
