@@ -29,8 +29,8 @@ if (isset($_GET['page_id']) && filter_var($_GET['page_id'], FILTER_VALIDATE_INT)
         // Fetch the page data
         $pageData = $stmt->fetch(PDO::FETCH_ASSOC);
         
-       echo "pagedata: {$pageData} <br>";
-        echo "filename: {$pageData['file_name']}";
+    //    echo "pagedata: {$pageData} <br>";
+    //     echo "filename: {$pageData['file_name']}";
         // Check if the page entry was found
         if ($pageData) {
             // Set image URL if an image exists

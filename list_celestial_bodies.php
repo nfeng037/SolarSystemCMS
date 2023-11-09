@@ -42,7 +42,7 @@ try {
                         <h2><?php echo htmlspecialchars($body['title']); ?></h2>
                         <p><?php echo htmlspecialchars($body['content']); ?></p>
                         <?php if (!empty($body['file_name'])): ?>
-                            <img src="/WEBD2/planetCMS/uploads/<?php echo htmlspecialchars($body['file_name']); ?>" alt="Image of <?php echo htmlspecialchars($body['title']); ?>">
+                            <img src="uploads/<?php echo htmlspecialchars($body['file_name']); ?>" alt="Image of <?php echo htmlspecialchars($body['title']); ?>">
                         <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
