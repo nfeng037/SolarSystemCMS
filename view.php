@@ -29,12 +29,14 @@ if (isset($_GET['page_id']) && filter_var($_GET['page_id'], FILTER_VALIDATE_INT)
         // Fetch the page data
         $pageData = $stmt->fetch(PDO::FETCH_ASSOC);
         
+       echo "pagedata: {$pageData} <br>";
+        echo "filename: {$pageData['file_name']}";
         // Check if the page entry was found
         if ($pageData) {
             // Set image URL if an image exists
             if (!empty($pageData['file_name'])) {
                 // We use the relative path from the web root directory
-                $imageUrl = '/WEBD2/planetCMS/uploads/' . htmlspecialchars($pageData['file_name']);
+                $imageUrl = 'uploads/' . htmlspecialchars($pageData['file_name']);
             }
         } else {
             $error = "Page not found.";
@@ -62,6 +64,12 @@ if (isset($_GET['page_id']) && filter_var($_GET['page_id'], FILTER_VALIDATE_INT)
         <?php if ($pageData): ?>
         <article>
             <h1><?php echo htmlspecialchars($pageData['title']); ?></h1>
+            <?php if ($isAdmin): ?>
+                <section class="page-actions">
+                    <a href="edit_page.php?page_id=<?php echo $page_id; ?>">Edit</a>
+                    <a href="delete_page.php?page_id=<?php echo $page_id; ?>" onclick="return confirm('Are you sure you want to delete this page?');">Delete</a>
+                </section>
+            <?php endif; ?>
             <?php if ($imageUrl): ?>
                 <!-- Image URL is the relative path from the web root directory -->
                 <img src="<?php echo $imageUrl; ?>" alt="Image for <?php echo htmlspecialchars($pageData['title']); ?>">
@@ -69,12 +77,6 @@ if (isset($_GET['page_id']) && filter_var($_GET['page_id'], FILTER_VALIDATE_INT)
             <section>
                 <?php echo nl2br(htmlspecialchars($pageData['content'])); ?>
             </section>
-            <?php if ($isAdmin): ?>
-                <section class="page-actions">
-                    <a href="edit_page.php?page_id=<?php echo $page_id; ?>">Edit</a>
-                    <a href="delete_page.php?page_id=<?php echo $page_id; ?>" onclick="return confirm('Are you sure you want to delete this page?');">Delete</a>
-                </section>
-            <?php endif; ?>
         </article>
         <?php else: ?>
             <p><?php echo $error; ?></p>

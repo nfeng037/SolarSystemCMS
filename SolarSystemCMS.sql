@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主机： localhost
--- 生成日期： 2023-11-09 02:37:02
+-- 生成日期： 2023-11-09 05:10:15
 -- 服务器版本： 10.4.28-MariaDB
 -- PHP 版本： 8.2.4
 
@@ -56,20 +56,6 @@ CREATE TABLE `celestial_bodies` (
   `image_url` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- 转存表中的数据 `celestial_bodies`
---
-
-INSERT INTO `celestial_bodies` (`celestial_body_id`, `name`, `category_id`, `description`, `image_url`) VALUES
-(8, 'Mercury', 1, 'The smallest planet in the Solar System and the closest to the Sun. It has a cratered surface and no atmosphere to support life as we know it.', 'uploads/Mercury.jpg'),
-(9, '1', 1, '1', NULL),
-(10, 'Mercury', 1, 'The smallest planet in the Solar System and the closest to the Sun. It has a cratered surface and no atmosphere to support life as we know it.', 'uploads/Mercury.jpg'),
-(11, '1', 1, '1', NULL),
-(12, '1', 1, '1', 'uploads/Uranus.png'),
-(13, '2', 1, '2', 'uploads/space-background.jpg'),
-(14, 'test', 1, '1', 'uploads/Venus.jpg'),
-(15, '122', 1, '1', 'uploads/saturn.png');
-
 -- --------------------------------------------------------
 
 --
@@ -96,18 +82,6 @@ CREATE TABLE `images` (
   `file_name` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- 转存表中的数据 `images`
---
-
-INSERT INTO `images` (`id`, `page_id`, `file_name`) VALUES
-(5, NULL, 'Mercury.jpg'),
-(6, NULL, 'Mercury.jpg'),
-(7, NULL, 'Uranus.png'),
-(8, NULL, 'space-background.jpg'),
-(9, 23, 'Venus.jpg'),
-(10, NULL, 'saturn.png');
-
 -- --------------------------------------------------------
 
 --
@@ -123,20 +97,6 @@ CREATE TABLE `pages` (
   `category_id` int(11) DEFAULT NULL,
   `creator_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- 转存表中的数据 `pages`
---
-
-INSERT INTO `pages` (`page_id`, `title`, `content`, `creation_time`, `last_modified_time`, `category_id`, `creator_id`) VALUES
-(17, 'Mercury', 'The smallest planet in the Solar System and the closest to the Sun. It has a cratered surface and no atmosphere to support life as we know it.', '2023-11-08 20:17:03', '2023-11-08 20:17:03', 1, 1),
-(18, '1', '1', '2023-11-08 20:23:10', '2023-11-08 20:23:10', 1, 1),
-(19, 'Mercury', 'The smallest planet in the Solar System and the closest to the Sun. It has a cratered surface and no atmosphere to support life as we know it.', '2023-11-08 20:27:54', '2023-11-08 20:27:54', 1, 1),
-(20, '1', '1', '2023-11-08 20:28:05', '2023-11-08 20:28:05', 1, 1),
-(21, '1', '1', '2023-11-08 20:29:30', '2023-11-08 20:29:30', 1, 1),
-(22, '2', '2', '2023-11-08 20:29:49', '2023-11-08 20:29:49', 1, 1),
-(23, 'test', '1', '2023-11-08 20:32:29', '2023-11-08 20:32:29', 1, 1),
-(24, '122', '1', '2023-11-08 20:42:50', '2023-11-08 20:42:50', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -218,7 +178,7 @@ ALTER TABLE `categories`
 -- 使用表AUTO_INCREMENT `celestial_bodies`
 --
 ALTER TABLE `celestial_bodies`
-  MODIFY `celestial_body_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `celestial_body_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- 使用表AUTO_INCREMENT `comments`
@@ -230,13 +190,13 @@ ALTER TABLE `comments`
 -- 使用表AUTO_INCREMENT `images`
 --
 ALTER TABLE `images`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- 使用表AUTO_INCREMENT `pages`
 --
 ALTER TABLE `pages`
-  MODIFY `page_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `page_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- 使用表AUTO_INCREMENT `users`

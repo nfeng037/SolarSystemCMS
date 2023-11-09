@@ -7,14 +7,13 @@ require 'db_connect.php'; // Use your database connection script
 require 'check_access.php'; // Use your user role checking script
 
 // Redirect user to login page if they're not logged in or if they're not an admin
-if (!isset($_SESSION['user_id']) || !checkUserRole('admin')) {
+if (!isset($_SESSION['user_id']) || !checkUserRole('admin', $_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
 
 // Initialize counts
 $newsCount = $galleryCount = $commentCount = 0;
-$error = ''; // Initialize error message variable
 
 try {
     // Get the count of gallery items
@@ -28,7 +27,7 @@ try {
 } catch (PDOException $e) {
     // Handle exceptions by logging and displaying an error message
     error_log("Database error: " . $e->getMessage());
-    $error = "An error occurred while fetching data. Please try again later.";
+    $error = "An error occurred while fetching data.";
 }
 
 ?>
@@ -45,13 +44,26 @@ try {
 
     <main>
         <h1>Admin Dashboard</h1>
-        <?php if ($error): ?>
-            <p class="error-message"><?php echo $error; ?></p>
-        <?php endif; ?>
 
-        <!-- ... rest of your HTML ... -->
+        <div class="admin-statistics">
+
+            <div class="statistic">
+                <a href="list_celestial_bodies.php">Celestial Bodies: <?php echo $galleryCount; ?></a>
+            </div>
+
+            <div class="statistic">
+                <a href="list_comments.php">Comments: <?php echo $commentCount; ?></a>
+            </div>
+        </div>
+
+        <div class="admin-links">
+            <a href="create_page.php">Create New</a>
+            <!-- Add more links as needed for other creation pages -->
+        </div>
     </main>
 
-    <!-- ... footer ... -->
+    <footer>
+        <!-- Footer content -->
+    </footer>
 </body>
 </html>

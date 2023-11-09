@@ -10,7 +10,7 @@ require_once 'check_access.php';
 <nav>
     <ul>
         <li><a href="index.php">HOME</a></li>
-        <li><a href="galley.php">GALLERY</a></li>
+        <li><a href="list_celestial_bodies.php">GALLERY</a></li>
         <?php if (isset($_SESSION['user_id']) && checkUserRole('admin')): ?>
             <li><a href="admin.php">ADMIN</a></li>
         <?php endif; ?>
