@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- 主机： localhost
--- 生成日期： 2023-11-09 05:10:15
+-- 主机： 127.0.0.1
+-- 生成日期： 2023-11-10 04:50:52
 -- 服务器版本： 10.4.28-MariaDB
 -- PHP 版本： 8.2.4
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- 数据库： `SolarSystemCMS`
+-- 数据库： `solarsystemcms`
 --
 
 -- --------------------------------------------------------
@@ -45,27 +45,13 @@ INSERT INTO `categories` (`category_id`, `category_name`) VALUES
 -- --------------------------------------------------------
 
 --
--- 表的结构 `celestial_bodies`
---
-
-CREATE TABLE `celestial_bodies` (
-  `celestial_body_id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `category_id` int(11) DEFAULT NULL,
-  `description` text DEFAULT NULL,
-  `image_url` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
 -- 表的结构 `comments`
 --
 
 CREATE TABLE `comments` (
   `comment_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `celestial_body_id` int(11) NOT NULL,
+  `page_id` int(11) NOT NULL,
   `content` text NOT NULL,
   `creation_time` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -95,7 +81,8 @@ CREATE TABLE `pages` (
   `creation_time` timestamp NOT NULL DEFAULT current_timestamp(),
   `last_modified_time` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `category_id` int(11) DEFAULT NULL,
-  `creator_id` int(11) NOT NULL
+  `creator_id` int(11) NOT NULL,
+  `image_url` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -129,19 +116,12 @@ ALTER TABLE `categories`
   ADD PRIMARY KEY (`category_id`);
 
 --
--- 表的索引 `celestial_bodies`
---
-ALTER TABLE `celestial_bodies`
-  ADD PRIMARY KEY (`celestial_body_id`),
-  ADD KEY `category_id` (`category_id`);
-
---
 -- 表的索引 `comments`
 --
 ALTER TABLE `comments`
   ADD PRIMARY KEY (`comment_id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `celestial_body_id` (`celestial_body_id`);
+  ADD UNIQUE KEY `page_id` (`page_id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- 表的索引 `images`
@@ -175,12 +155,6 @@ ALTER TABLE `categories`
   MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- 使用表AUTO_INCREMENT `celestial_bodies`
---
-ALTER TABLE `celestial_bodies`
-  MODIFY `celestial_body_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
-
---
 -- 使用表AUTO_INCREMENT `comments`
 --
 ALTER TABLE `comments`
@@ -190,13 +164,13 @@ ALTER TABLE `comments`
 -- 使用表AUTO_INCREMENT `images`
 --
 ALTER TABLE `images`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
 -- 使用表AUTO_INCREMENT `pages`
 --
 ALTER TABLE `pages`
-  MODIFY `page_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `page_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=97;
 
 --
 -- 使用表AUTO_INCREMENT `users`
@@ -209,17 +183,10 @@ ALTER TABLE `users`
 --
 
 --
--- 限制表 `celestial_bodies`
---
-ALTER TABLE `celestial_bodies`
-  ADD CONSTRAINT `celestial_bodies_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`);
-
---
 -- 限制表 `comments`
 --
 ALTER TABLE `comments`
-  ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
-  ADD CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`celestial_body_id`) REFERENCES `celestial_bodies` (`celestial_body_id`);
+  ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
 
 --
 -- 限制表 `images`

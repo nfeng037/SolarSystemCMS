@@ -3,11 +3,11 @@
 
 session_start();
 
-require 'db_connect.php'; // Use your database connection script
-require 'check_access.php'; // Use your user role checking script
+require 'db_connect.php'; 
+require 'check_access.php'; 
 
 // Redirect user to login page if they're not logged in or if they're not an admin
-if (!isset($_SESSION['user_id']) || !checkUserRole('admin', $_SESSION['user_id'])) {
+if (!isset($_SESSION['user_id']) || !checkUserRole('admin')) {
     header("Location: login.php");
     exit;
 }
@@ -48,11 +48,11 @@ try {
         <div class="admin-statistics">
 
             <div class="statistic">
-                <a href="list_celestial_bodies.php">Celestial Bodies: <?php echo $galleryCount; ?></a>
+                <a href="list_pages.php">Celestial Bodies: <?= $galleryCount; ?></a>
             </div>
 
             <div class="statistic">
-                <a href="list_comments.php">Comments: <?php echo $commentCount; ?></a>
+                <a href="list_comments.php">Comments: <?= $commentCount; ?></a>
             </div>
         </div>
 
