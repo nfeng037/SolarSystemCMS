@@ -30,79 +30,100 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = trim($_POST['name']);
     $description = trim($_POST['description']);
     $category_id = $_POST['category'];
+    $imageUploaded = false; // Flag to check if the image is uploaded and valid
 
     $config = HTMLPurifier_Config::createDefault();
     $purifier = new HTMLPurifier($config);
     $clean_html = $purifier->purify($description);
 
-    $pdo->beginTransaction();
-
-    try {
-        $stmt = $pdo->prepare("UPDATE pages SET title = :title, content = :content, category_id = :category_id WHERE page_id = :page_id");
-        $stmt->execute([
-            ':title' => $name,
-            ':content' => $clean_html,
-            ':category_id' => $category_id,
-            ':page_id' => $page_id
-        ]);
-
-        // Handle image upload if a new image has been provided
-        if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
-            // Handle file upload
-            $image = $_FILES['image'];
-            $temporaryPath = $image['tmp_name'];
-            $imageFilename = basename($image['name']);
-            $newPath = file_upload_path($image['name']); // Absolute path
-            $relativePath = file_upload_path($image['name'], 'uploads', true); // Relative path
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
+        $image = $_FILES['image'];
+        $temporaryPath = $image['tmp_name'];
+        $imageFilename = basename($image['name']);
+        $newPath = file_upload_path($image['name']); // Absolute path
+        $relativePath = file_upload_path($image['name'], 'uploads', true); // Relative path
     
-            if (file_is_an_image($temporaryPath, $newPath)) {
-                if (move_uploaded_file($temporaryPath, $newPath)) {
-                    // Image uploaded successfully
-                    $resizedFilename = 'resized_' . $imageFilename;
-                    $resizedPath = file_upload_path($resizedFilename); // Absolute path for resizing
+        // Check if the file is an image
+        if (file_is_an_image($temporaryPath, $newPath)) {
+            if (move_uploaded_file($temporaryPath, $newPath)) {
+                $resizedFilename = 'resized_' . $imageFilename;
+                $resizedPath = file_upload_path($resizedFilename); // Absolute path for resizing
+    
+                // Resize and save the image
+                if (resize_image($newPath, $resizedPath, 400)) {
+                    $resizedRelativePath = 'uploads/' . $resizedFilename; 
+    
+                    // Insert or Update image information into the images table with reference to the page
+                    $updateImageStmt = $pdo->prepare("UPDATE images SET file_name = :file_name WHERE page_id = :page_id");
+                    $updateImageStmt->execute([
+                        ':file_name' => $resizedRelativePath,
+                        ':page_id' => $page_id
+                    ]);
                     
-                    // Resize and save image
-                    if (resize_image($newPath, $resizedPath, 400)) {
-                        $resizedRelativePath = 'uploads/' . $resizedFilename; 
-                    
-                        // Insert or Update image information into the images table with reference to the page
-                        $stmt = $pdo->prepare("INSERT INTO images (page_id, file_name) VALUES (:page_id, :file_name) ON DUPLICATE KEY UPDATE file_name = :new_file_name");
-                    
-                        $stmt->execute([
-                            ':page_id' => $page_id,
-                            ':file_name' => $resizedRelativePath, // For the INSERT
-                            ':new_file_name' => $resizedRelativePath // For the UPDATE
-                        ]);
-                    
-                        // Update celestial_bodies table with the new image URL
-                        $stmt = $pdo->prepare("UPDATE pages SET image_url = :image_url WHERE page_id = :page_id");
-                        $stmt->execute([
-                            ':image_url' => $resizedRelativePath,
-                            ':page_id' => $page_id
-                        ]);
-                    } else {
-                        $error = 'Image could not be resized.';
-                    }
+                    // Update the pages table with the new image URL
+                    $stmt = $pdo->prepare("UPDATE pages SET image_url = :image_url WHERE page_id = :page_id");
+                    $stmt->execute([
+                        ':image_url' => $resizedRelativePath,
+                        ':page_id' => $page_id
+                    ]);
+    
+                    $imageUploaded = true;
                 } else {
-                    $error = 'The file could not be uploaded.';
+                    $error = 'Image could not be resized.';
                 }
             } else {
-                $error = 'The file is not a valid image.';
+                $error = 'The file could not be uploaded.';
             }
+        } else {
+            $error = 'The file is not a valid image.';
         }
+    }    
 
-        $pdo->commit();
-        $success = 'Page updated successfully.';
-        header("Location: view.php?page_id=" . $page_id);
-        exit;
+    // Proceed with updating the page only if there's no error
+    if (!$error) {
+        $pdo->beginTransaction();
 
-    } catch (Exception $e) {
-        $pdo->rollBack();
-        $error = 'Error updating the page: ' . $e->getMessage();
+        try {
+            // Update page details
+            $stmt = $pdo->prepare("UPDATE pages SET title = :title, content = :content, category_id = :category_id WHERE page_id = :page_id");
+            $stmt->execute([
+                ':title' => $name,
+                ':content' => $clean_html,
+                ':category_id' => $category_id,
+                ':page_id' => $page_id
+            ]);
+
+            if ($imageUploaded) {
+                // Update the pages table with the new image URL
+                $updatePageStmt = $pdo->prepare("UPDATE pages SET image_url = :image_url WHERE page_id = :page_id");
+                $updatePageStmt->execute([
+                    ':image_url' => $resizedRelativePath,
+                    ':page_id' => $page_id
+                ]);
+
+
+                $updateImageStmt = $pdo->prepare("UPDATE images SET file_name = :file_name WHERE page_id = :page_id");
+                $updateImageStmt->execute([
+                    ':file_name' => $resizedRelativePath,
+                    ':page_id' => $page_id
+                ]);
+            }
+            
+
+            $pdo->commit();
+            $success = 'Page updated successfully.';
+            header("Location: view.php?page_id=" . $page_id);
+            exit;
+
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            $error = 'Error updating the page: ' . $e->getMessage();
+        }
     }
 }
 
 ?>
+
 
 
 
@@ -157,7 +178,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <label for="image">Change Image (optional):</label>
                 <input type="file" id="image" name="image">
                 <?php if (!empty($page['image_url'])): ?>
-                    <img src="uploads/<?= htmlspecialchars($page['image_url']); ?>" alt="Current Image" class="edit-image-preview">
+                    <img src="<?= htmlspecialchars($page['image_url']); ?>" alt="Current Image" class="edit-image-preview">
                 <?php endif; ?>
             </div>
 

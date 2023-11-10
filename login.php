@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['username'], $_POST['pa
             $_SESSION['username'] = $user['username'];
             $_SESSION['role'] = $user['role'];
 
-            header("Location: admin.php");
+            header("Location: index.php");
             exit;
         } else {
             $error = 'The password you entered was not valid.';
@@ -42,11 +42,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['username'], $_POST['pa
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <?php include 'navbar.php'; ?>
-    </header>
-    <main>
-        <form action="login.php" method="post">
+    <main class="login-container">
+        <form action="login.php" method="post" class="login-form">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required>
             <br>

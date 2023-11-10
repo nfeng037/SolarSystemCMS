@@ -26,13 +26,24 @@ function file_is_an_image($temporary_path, $new_path) {
     $allowed_file_extensions = ['gif', 'jpg', 'jpeg', 'png'];
 
     $actual_file_extension = strtolower(pathinfo($new_path, PATHINFO_EXTENSION));
-    $actual_mime_type = getimagesize($temporary_path)['mime'];
+    $imageInfo = getimagesize($temporary_path);
+
+    if ($imageInfo === false) {
+        error_log('Error: getimagesize() failed for file: ' . $temporary_path);
+        return false;
+    }
+
+    $actual_mime_type = $imageInfo['mime'];
 
     $file_extension_is_valid = in_array($actual_file_extension, $allowed_file_extensions);
     $mime_type_is_valid = in_array($actual_mime_type, $allowed_mime_types);
 
+    error_log('Extension check: ' . ($file_extension_is_valid ? 'Passed' : 'Failed'));
+    error_log('MIME type check: ' . ($mime_type_is_valid ? 'Passed' : 'Failed'));
+
     return $file_extension_is_valid && $mime_type_is_valid;
 }
+
 
 
 function resize_image($original_path, $resized_path, $max_width) {

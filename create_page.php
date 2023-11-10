@@ -3,11 +3,10 @@
 
 session_start();
 
-require 'db_connect.php'; 
+require 'db_connect.php';
 require 'check_access.php';
 require './lib/htmlpurifier-4.15.0/library/HTMLPurifier.auto.php';
 require_once 'image_functions.php';
-
 
 if (!isset($_SESSION['user_id']) || !checkUserRole('admin')) {
     header("Location: login.php");
@@ -20,79 +19,83 @@ $success = '';
 $stmt = $pdo->query("SELECT category_id, category_name FROM categories");
 $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = trim($_POST['name']);
     $description = trim($_POST['description']);
     $category_id = $_POST['category'];
     $imageFilename = '';
+    $imageUploaded = false; 
 
     $config = HTMLPurifier_Config::createDefault();
     $purifier = new HTMLPurifier($config);
     $clean_html = $purifier->purify($description);
 
-    $pdo->beginTransaction();
+    if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+        $image = $_FILES['image'];
+        $temporaryPath = $image['tmp_name'];
+        $imageFilename = basename($image['name']);
+        $newPath = file_upload_path($image['name']);
+        $relativePath = file_upload_path($image['name'], 'uploads', true);
 
-    try {
-
-
-        $stmt = $pdo->prepare("INSERT INTO pages (title, content, category_id, creator_id) VALUES (:title, :content, :category_id, :creator_id)");
-        $stmt->execute([
-            ':title' => $name,
-            ':content' => $clean_html,
-            ':category_id' => $category_id,
-            ':creator_id' => $_SESSION['user_id']
-        ]);
-        $page_id = $pdo->lastInsertId();
-
-        if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-            $image = $_FILES['image'];
-            $temporaryPath = $image['tmp_name'];
-            $imageFilename = basename($image['name']);
-            $newPath = file_upload_path($image['name']); 
-            $relativePath = file_upload_path($image['name'], 'uploads', true); 
-
-            if (file_is_an_image($temporaryPath, $newPath)) {
-                if (move_uploaded_file($temporaryPath, $newPath)) {
-                    $resizedFilename = 'resized_' . $imageFilename;
-                    $resizedPath = file_upload_path($resizedFilename); 
-                    
-                    // Resize and save image
-                    if (resize_image($newPath, $resizedPath, 400)) {
-                        $resizedFilename = basename($resizedPath);
-                        $resizedRelativePath = 'uploads/' . $resizedFilename; 
+        if (file_is_an_image($temporaryPath, $newPath)) {
+            if (move_uploaded_file($temporaryPath, $newPath)) {
+                $resizedFilename = 'resized_' . $imageFilename;
+                $resizedPath = file_upload_path($resizedFilename);
                 
-                        $stmt = $pdo->prepare("INSERT INTO images (page_id, file_name) VALUES (:page_id, :file_name)");
-                        $stmt->execute([
-                            ':page_id' => $page_id,
-                            ':file_name' => $resizedRelativePath 
-                        ]);
-                
-                         $stmt = $pdo->prepare("UPDATE pages SET image_url = :image_url WHERE page_id = :page_id");
-                        $stmt->execute([
-                            ':image_url' => $resizedRelativePath,
-                            ':page_id' => $page_id
-                        ]);
-                    } else {
-                        $error = 'Image could not be resized.';
-                    }
+                if (resize_image($newPath, $resizedPath, 400)) {
+                    $resizedFilename = basename($resizedPath);
+                    $resizedRelativePath = 'uploads/' . $resizedFilename;
+                    $imageUploaded = true; 
                 } else {
-                    $error = 'The file could not be uploaded.';
+                    $error = 'Image could not be resized.';
                 }
+            } else {
+                $error = 'The file could not be uploaded.';
             }
+        } else {
+            $error = 'The file is not a valid image.';
         }
+    }
 
-        $pdo->commit();
-        $success = ' page created successfully.';
-        header("Location: view.php?page_id=" . $page_id);
-        exit;
+    if (!$error) {
+        $pdo->beginTransaction();
 
-    } catch (Exception $e) {
-        $pdo->rollBack();
-        $error = 'Error creating the page: ' . $e->getMessage();
+        try {
+            $stmt = $pdo->prepare("INSERT INTO pages (title, content, category_id, creator_id) VALUES (:title, :content, :category_id, :creator_id)");
+            $stmt->execute([
+                ':title' => $name,
+                ':content' => $clean_html,
+                ':category_id' => $category_id,
+                ':creator_id' => $_SESSION['user_id']
+            ]);
+            $page_id = $pdo->lastInsertId();
+
+            if ($imageUploaded) {
+                $stmt = $pdo->prepare("INSERT INTO images (page_id, file_name) VALUES (:page_id, :file_name)");
+                $stmt->execute([
+                    ':page_id' => $page_id,
+                    ':file_name' => $resizedRelativePath
+                ]);
+                
+                $stmt = $pdo->prepare("UPDATE pages SET image_url = :image_url WHERE page_id = :page_id");
+                $stmt->execute([
+                    ':image_url' => $resizedRelativePath,
+                    ':page_id' => $page_id
+                ]);
+            }
+
+            $pdo->commit();
+            $success = 'Page created successfully.';
+            header("Location: view.php?page_id=" . $page_id);
+            exit;
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            $error = 'Error creating the page: ' . $e->getMessage();
+        }
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -106,7 +109,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
     <?php include 'navbar.php'; ?>
 
-    <main>
+    <main class="create">
         <h1>Create New Page</h1>
         
         <!-- Error or success messages -->

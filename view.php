@@ -10,14 +10,13 @@ require 'check_access.php';
 $pageData = null;
 $error = '';
 $isAdmin = checkUserRole('admin');
-$imageUrl = '';
 
 // Check if a page_id is provided and it's a valid integer
 if (isset($_GET['page_id']) && filter_var($_GET['page_id'], FILTER_VALIDATE_INT)) {
     $page_id = $_GET['page_id'];
     
-    // Prepare a SELECT statement to fetch the page data with its image
-    $stmt = $pdo->prepare("SELECT p.title, p.content, i.file_name FROM pages p LEFT JOIN images i ON p.page_id = i.page_id WHERE p.page_id = :page_id");
+    // Prepare a SELECT statement to fetch the page data including the image URL
+    $stmt = $pdo->prepare("SELECT title, content, image_url FROM pages WHERE page_id = :page_id");
     
     // Bind the page_id parameter
     $stmt->bindParam(':page_id', $page_id, PDO::PARAM_INT);
@@ -29,16 +28,8 @@ if (isset($_GET['page_id']) && filter_var($_GET['page_id'], FILTER_VALIDATE_INT)
         // Fetch the page data
         $pageData = $stmt->fetch(PDO::FETCH_ASSOC);
         
-    //    echo "pagedata: {$pageData} <br>";
-    //     echo "filename: {$pageData['file_name']}";
         // Check if the page entry was found
-        if ($pageData) {
-            // Set image URL if an image exists
-            if (!empty($pageData['file_name'])) {
-                // We use the relative path from the web root directory
-                $imageUrl =  htmlspecialchars($pageData['file_name']);
-            }
-        } else {
+        if (!$pageData) {
             $error = "Page not found.";
         }
     } catch (PDOException $e) {
@@ -70,9 +61,9 @@ if (isset($_GET['page_id']) && filter_var($_GET['page_id'], FILTER_VALIDATE_INT)
                     <a href="delete_page.php?page_id=<?= $page_id; ?>" onclick="return confirm('Are you sure you want to delete this page?');">Delete</a>
                 </section>
             <?php endif; ?>
-            <?php if ($imageUrl): ?>
-                <!-- Image URL is the relative path from the web root directory -->
-                <img src="<?= $imageUrl; ?>" alt="Image for <?= htmlspecialchars($pageData['title']); ?>">
+            <?php if (!empty($pageData['image_url'])): ?>
+                <!-- Display the image using the image_url from the pages table -->
+                <img src="<?= htmlspecialchars($pageData['image_url']); ?>" alt="Image for <?= htmlspecialchars($pageData['title']); ?>">
             <?php endif; ?>
             <section>
                 <?= $pageData['content']; ?>

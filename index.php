@@ -1,57 +1,73 @@
 <?php
-include 'db_connect.php';
+// index.php
 
-// Prepare a SQL statement to fetch all planet data
-$stmt = $pdo->prepare("SELECT * FROM pages");
-$stmt->execute();
+session_start();
 
-// Fetch all the planet records
-$pages = $stmt->fetchAll();
+require 'db_connect.php'; 
+require 'check_access.php'; 
+
+// Redirect user to login page if they're not logged in or if they're not an admin
+if (!isset($_SESSION['user_id']) || !checkUserRole('admin')) {
+    header("Location: login.php");
+    exit;
+}
+
+// Initialize counts
+$newsCount = $galleryCount = $commentCount = 0;
+
+try {
+    // Get the count of gallery items
+    $stmt = $pdo->query("SELECT COUNT(*) FROM pages");
+    $galleryCount = $stmt->fetchColumn();
+
+    // Get the count of comments
+    $stmt = $pdo->query("SELECT COUNT(*) FROM comments");
+    $commentCount = $stmt->fetchColumn();
+
+} catch (PDOException $e) {
+    // Handle exceptions by logging and displaying an error message
+    error_log("Database error: " . $e->getMessage());
+    $error = "An error occurred while fetching data.";
+}
+
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cosmos Explorer</title>
-<link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <header>
-    <!-- Navigation bar -->
-    <?php include 'navbar.php'; ?>
-  </header>
+<body >
 
-  <main>
-    <!-- Main banner -->
-    <section class="intro">
-      <h1>Welcome to the Cosmos Explorer</h1>
-      <p>Your gateway to the wonders of our universe! Embark on an interstellar journey with us as we unveil the secrets of the cosmos. Our intuitive interface invites space enthusiasts of all ages to explore, learn, and connect. Delve into our extensive database, join vibrant discussions, and customize your celestial voyage. Whether you're here to contribute knowledge or simply gaze at the stars, the Cosmos Explorer is your space odyssey. Begin your adventure with a click and let the sky be not the limit, but the beginning!</p>
-      <a href='list_pages.php' class="start-button">Start Adventure</a>
-    </section>
-    <!-- Gallery -->
-    <section class="gallery">
-    <h2>Gallery</h2>
-    <div class="article-container">
-        <?php if (!empty($pages)): ?>
-            <?php foreach ($pages as $page): ?>
-                <article>
-                    <img src="<?= htmlspecialchars($page['image_url']); ?>" alt="<?= htmlspecialchars($page['title']); ?>">
-                    <h3><?= htmlspecialchars($page['title']); ?></h3>
-                    <p><?= $page['content']; ?></p>
-                </article>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <p>No result found.</p>
-        <?php endif; ?>
-    </div>
-    </section>
-  </main>
+        <header>
+            <?php include 'navbar.php'; ?>
+        </header>
 
-  <footer>
-    <!-- Footer content -->
-  </footer>
+        <main class="index_body">
+            <h1>Admin Dashboard</h1>
+
+            <div class="admin-statistics">
+
+                <div class="statistic">
+                    <a href="list_pages.php">Celestial Bodies: <?= $galleryCount; ?></a>
+                </div>
+
+                <div class="statistic">
+                    <a href="list_comments.php">Comments: <?= $commentCount; ?></a>
+                </div>
+            </div>
+
+            <div class="admin-links">
+                <a href="create_page.php">Create New</a>
+                <!-- Add more links as needed for other creation pages -->
+            </div>
+        </main>
+
+        <footer>
+            <!-- Footer content -->
+        </footer>
 
 </body>
 </html>
