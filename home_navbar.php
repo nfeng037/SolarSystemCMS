@@ -4,6 +4,9 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 require_once 'check_access.php';
+
+$stmt = $pdo->query("SELECT category_id, category_name FROM categories");
+$categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!-- Navigation bar -->
@@ -11,6 +14,16 @@ require_once 'check_access.php';
     <ul>
         <li><a href="home.php">HOME</a></li>
         <li><a href="list_pages.php">GALLERY</a></li>
+        <li>
+            <label for="category">Category</label>
+            <select id="category" name="category" required>
+                <?php foreach ($categories as $category): ?>
+                    <option value="<?= $category['category_id']; ?>">
+                        <?= htmlspecialchars($category['category_name']); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </li>
         <?php if (isset($_SESSION['user_id']) && checkUserRole('admin')): ?>
             <li><a href="index.php">ADMIN</a></li>
         <?php endif; ?>
