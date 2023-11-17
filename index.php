@@ -6,7 +6,6 @@ session_start();
 require 'db_connect.php'; 
 require 'check_access.php'; 
 
-// Redirect user to login page if they're not logged in or if they're not an admin
 if (!isset($_SESSION['user_id']) || !checkUserRole('admin')) {
     header("Location: login.php");
     exit;

@@ -94,7 +94,7 @@ nav {
   background-color: rgba(0, 0, 0, 0.8);
   color: #fff;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   padding: 1rem;
   position: fixed;
   top: 0;
@@ -359,6 +359,7 @@ article {
   overflow-x: auto; /* Ensures the table is scrollable on small screens */
 }
 
+
 /* Table styles */
 .pages-table {
   width: 100%;
@@ -382,13 +383,58 @@ article {
   text-overflow: ellipsis; /* Adds an ellipsis to indicate hidden text */
 }
 
+/* Table Header Styles */
 .pages-table th {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: #5C6BC0; 
+  color: #ffffff; 
+  font-weight: bold;
+  padding: 0.75rem;
+  border-bottom: 2px solid #fff;
+  text-align: left;
 }
 
-.pages-table tbody tr:nth-child(odd) {
-  background-color: rgba(255, 255, 255, 0.05);
+/* Sorting Indicators */
+.pages-table th a {
+  color: #ffffff;
+  text-decoration: none;
+  margin-left: 0.25rem;
 }
+
+
+.pages-table th a::before {
+  content: '';
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+}
+
+
+.pages-table th a[href*="order=asc"]::before {
+  border-bottom: 5px solid #fff; 
+}
+
+
+.pages-table th a[href*="order=desc"]::before {
+  border-top: 5px solid #fff; 
+}
+
+
+.pages-table th a.current-sort[href*="order=asc"]::before {
+  border-bottom: 5px solid #55dd5a; 
+}
+
+.pages-table th a.current-sort[href*="order=desc"]::before {
+  border-top: 5px solid #55dd5a; 
+}
+
+/* Hover effect */
+.pages-table th:hover {
+  background-color: #3d556b;
+  cursor: pointer;
+}
+
 
 /* Action button styles */
 .edit-btn,

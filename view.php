@@ -62,7 +62,6 @@ if (isset($_GET['page_id']) && filter_var($_GET['page_id'], FILTER_VALIDATE_INT)
                 </section>
             <?php endif; ?>
             <?php if (!empty($pageData['image_url'])): ?>
-                <!-- Display the image using the image_url from the pages table -->
                 <img src="<?= htmlspecialchars($pageData['image_url']); ?>" alt="Image for <?= htmlspecialchars($pageData['title']); ?>">
             <?php endif; ?>
             <section>

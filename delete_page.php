@@ -31,7 +31,7 @@ if (isset($_GET['page_id'])) {
         // Commit the transaction
         $pdo->commit();
         
-        header("Location: index.php");
+        header("Location: list_pages.php");
         exit;
     } catch (PDOException $e) {
         $pdo->rollback();

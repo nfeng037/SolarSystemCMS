@@ -44,20 +44,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $temporaryPath = $image['tmp_name'];
         $imageFilename = basename($image['name']);
         $resizedFilename = 'resized_' . $imageFilename;
-        $resizedPath = file_upload_path($resizedFilename); // Absolute path for resizing
+        $resizedPath = file_upload_path($resizedFilename); 
     
-        // Check if the file is an image
         if (file_is_an_image($temporaryPath, $resizedPath)) {
             if (resize_image($temporaryPath, $resizedPath, 400)) {
-                $resizedRelativePath = 'uploads/' . $resizedFilename; 
-    
-                // Insert or Update image information into the images table with reference to the page
-                $updateImageStmt = $pdo->prepare("UPDATE images SET file_name = :file_name WHERE page_id = :page_id");
-                $updateImageStmt->execute([
-                    ':file_name' => $resizedRelativePath,
-                    ':page_id' => $page_id
-                ]);
-                
+                $resizedRelativePath = 'uploads/' . $resizedFilename;
+        
+                $checkImageStmt = $pdo->prepare("SELECT * FROM images WHERE page_id = :page_id");
+                $checkImageStmt->execute([':page_id' => $page_id]);
+                $existingImage = $checkImageStmt->fetch(PDO::FETCH_ASSOC);
+        
+                if ($existingImage) {
+                    $updateImageStmt = $pdo->prepare("UPDATE images SET file_name = :file_name WHERE page_id = :page_id");
+                    $updateImageStmt->execute([
+                        ':file_name' => $resizedRelativePath,
+                        ':page_id' => $page_id
+                    ]);
+                } else {
+                    $insertImageStmt = $pdo->prepare("INSERT INTO images (page_id, file_name) VALUES (:page_id, :file_name)");
+                    $insertImageStmt->execute([
+                        ':page_id' => $page_id,
+                        ':file_name' => $resizedRelativePath
+                    ]);
+                }
+        
                 $imageUploaded = true;
             } else {
                 $error = 'Image could not be resized.';
@@ -65,23 +75,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             $error = 'The file is not a valid image.';
         }
-    } 
+    }
     
     $deleteImage = isset($_POST['delete_image']) && $_POST['delete_image'] == '1';
 
     if ($deleteImage && !empty($page['image_url'])) {
-        // SQL query to remove image entry from the database
+        $deleteImageStmt = $pdo->prepare("DELETE FROM images WHERE page_id = :page_id");
+        $deleteImageStmt->execute([':page_id' => $page_id]);
+
         $stmt = $pdo->prepare("UPDATE pages SET image_url = NULL WHERE page_id = :page_id");
         $stmt->execute([':page_id' => $page_id]);
 
-        // Delete the file from the file system
-        $imagePath = 'path/to/uploads/' . basename($page['image_url']);
+        $resizedFilename = basename($page['image_url']);
+        $imagePath = 'uploads/' . $resizedFilename;
+
         if (file_exists($imagePath)) {
-            unlink($imagePath);
+            if (!unlink($imagePath)) {
+                $error = "Error: Unable to delete file.";
+            } else {
+                echo "File successfully deleted.";
+            }
+        } else {
+            $error = "Error: File does not exist.";
         }
 
-        // Set flag to not process the rest of the image upload logic
-        $imageUploaded = false;
     }
 
     if (!$error) {
@@ -194,6 +211,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <input type="submit" value="Update Page">
             </div>
         </form>
+        <a href="delete_page.php?page_id=<?= $page['page_id']; ?>" class="delete-btn" onclick="return confirm('Are you sure you want to delete this page?');">Delete</a>
     </main>
 
     <!-- Include Quill JS for the rich text editor -->

@@ -4,17 +4,23 @@
 session_start();
 
 require 'db_connect.php';
+require 'check_access.php'; 
 
-// Initialize an array to hold the pages data
+if (!isset($_SESSION['user_id']) || !checkUserRole('admin')) {
+    header("Location: login.php");
+    exit;
+}
+
 $pages = [];
+$sort = isset($_GET['sort']) ? $_GET['sort'] : 'title'; 
+$sort_order = isset($_GET['order']) && $_GET['order'] == 'desc' ? 'DESC' : 'ASC';
+
+$current_sort = $sort . $sort_order;
 
 try {
-    // Prepare the SQL statement to fetch data from 'pages' table
-    // Join with 'images' table to get the image file names
-    $stmt = $pdo->prepare("SELECT * FROM pages");
+    $stmt = $pdo->prepare("SELECT pages.*, categories.category_name FROM pages LEFT JOIN categories ON pages.category_id = categories.category_id ORDER BY $sort $sort_order");
     $stmt->execute();
     
-    // Fetch all pages records
     $pages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = "Database error: " . $e->getMessage();
@@ -40,10 +46,23 @@ try {
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Title</th>
+                        <th>
+                            Title
+                            <a href="?sort=title&order=asc" class="<?= ($current_sort == 'titleASC') ? 'current-sort' : '' ?>"></a>
+                            <a href="?sort=title&order=desc" class="<?= ($current_sort == 'titleDESC') ? 'current-sort' : '' ?>"></a>
+                        </th>
+                        <th>Category</th>
                         <th>Content</th>
-                        <th>Creation Time</th>
-                        <th>Last Modified</th>
+                        <th>
+                            Creation Time
+                            <a href="?sort=creation_time&order=asc" class="<?= ($current_sort == 'creation_timeASC') ? 'current-sort' : '' ?>"></a>
+                            <a href="?sort=creation_time&order=desc" class="<?= ($current_sort == 'creation_timeDESC') ? 'current-sort' : '' ?>"></a>
+                        </th>
+                        <th>
+                            Last Modified
+                            <a href="?sort=last_modified_time&order=asc" class="<?= ($current_sort == 'last_modified_timeASC') ? 'current-sort' : '' ?>"></a>
+                            <a href="?sort=last_modified_time&order=desc" class="<?= ($current_sort == 'last_modified_timeDESC') ? 'current-sort' : '' ?>"></a>
+                        </th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -51,7 +70,8 @@ try {
                     <?php foreach ($pages as $index => $page): ?>
                         <tr>
                             <td><?= $index + 1; ?></td>
-                            <td><?= htmlspecialchars($page['title']); ?></td>
+                            <td><a href="view.php?page_id=<?= $page['page_id']; ?>"><?= htmlspecialchars($page['title']); ?></a></td>
+                            <td><?= htmlspecialchars($page['category_name']); ?></td>
                             <td><?= $page['content']; ?></td>
                             <td><?= htmlspecialchars($page['creation_time']); ?></td>
                             <td><?= htmlspecialchars($page['last_modified_time']); ?></td>
@@ -64,6 +84,9 @@ try {
                 </tbody>
             </table>
         <?php else: ?>
+            <div class="admin-links">
+                <a href="create_page.php">Create New</a>
+            </div>
             <p class="no-data">No celestial bodies found.</p>
         <?php endif; ?>
     </main>
