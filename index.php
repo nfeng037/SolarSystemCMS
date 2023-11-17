@@ -23,6 +23,10 @@ try {
     $stmt = $pdo->query("SELECT COUNT(*) FROM comments");
     $commentCount = $stmt->fetchColumn();
 
+    // Get the count of categories
+    $stmt = $pdo->query("SELECT COUNT(*) FROM categories");
+    $categoriesCount = $stmt->fetchColumn();
+
 } catch (PDOException $e) {
     // Handle exceptions by logging and displaying an error message
     error_log("Database error: " . $e->getMessage());
@@ -40,9 +44,9 @@ try {
 </head>
 <body >
 
-        <header>
+
             <?php include 'navbar.php'; ?>
-        </header>
+
 
         <main class="index_body">
             <h1>Admin Dashboard</h1>
@@ -53,6 +57,10 @@ try {
                     <a href="list_pages.php">Celestial Bodies: <?= $galleryCount; ?></a>
                 </div>
 
+                <div class="statistic">
+                    <a href="list_categories.php">Categories: <?= $categoriesCount; ?></a>
+                </div>
+                
                 <div class="statistic">
                     <a href="list_comments.php">Comments: <?= $commentCount; ?></a>
                 </div>

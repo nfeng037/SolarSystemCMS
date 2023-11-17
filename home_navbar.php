@@ -9,7 +9,7 @@ require_once 'check_access.php';
 <!-- Navigation bar -->
 <nav>
     <ul>
-        <li><a href="index.php">HOME</a></li>
+        <li><a href="home.php">HOME</a></li>
         <li><a href="list_pages.php">GALLERY</a></li>
         <?php if (isset($_SESSION['user_id']) && checkUserRole('admin')): ?>
             <li><a href="index.php">ADMIN</a></li>

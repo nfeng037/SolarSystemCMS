@@ -17,10 +17,10 @@ $pages = $stmt->fetchAll();
 <title>Cosmos Explorer</title>
 <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body  class="user">
   <header>
     <!-- Navigation bar -->
-    <?php include 'navbar.php'; ?>
+    <?php include 'home_navbar.php'; ?>
   </header>
 
   <main>
