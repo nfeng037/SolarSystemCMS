@@ -11,9 +11,7 @@ function file_upload_path($original_filename, $upload_subfolder_name = 'uploads'
     $path_segments = [$current_folder, $upload_subfolder_name, basename($original_filename)];
     $absolute_path = join(DIRECTORY_SEPARATOR, $path_segments);
 
-    // Return an absolute path or a web path
     if ($return_relative_path) {
-        // Convert backslashes to forward slashes for web compatibility
         $relative_path = $upload_subfolder_name . '/' . basename($original_filename);
         return str_replace('\\', '/', $relative_path); 
     }

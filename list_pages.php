@@ -11,7 +11,7 @@ $pages = [];
 try {
     // Prepare the SQL statement to fetch data from 'pages' table
     // Join with 'images' table to get the image file names
-    $stmt = $pdo->prepare("SELECT p.page_id, p.title, p.content, i.file_name FROM pages p LEFT JOIN images i ON p.page_id = i.page_id");
+    $stmt = $pdo->prepare("SELECT * FROM pages");
     $stmt->execute();
     
     // Fetch all pages records
@@ -32,23 +32,39 @@ try {
     <header>
         <?php include 'navbar.php'; ?>
     </header>
-    <main>
+    <main class="main-content">
         <h1>Pages List</h1>
         
         <?php if (!empty($pages)): ?>
-            <div class="pages-list">
-                <?php foreach ($pages as $page): ?>
-                    <div class="page-body">
-                        <h2><?= htmlspecialchars($page['title']); ?></h2>
-                        <p><?= $page['content']; ?></p>
-                        <?php if (!empty($page['file_name'])): ?>
-                            <img src="<?= htmlspecialchars($page['file_name']); ?>" alt="Image of <?= htmlspecialchars($page['title']); ?>">
-                        <?php endif; ?>
-                    </div>
-                <?php endforeach; ?>
-            </div>
+            <table class="pages-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Title</th>
+                        <th>Content</th>
+                        <th>Creation Time</th>
+                        <th>Last Modified</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($pages as $index => $page): ?>
+                        <tr>
+                            <td><?= $index + 1; ?></td>
+                            <td><?= htmlspecialchars($page['title']); ?></td>
+                            <td><?= $page['content']; ?></td>
+                            <td><?= htmlspecialchars($page['creation_time']); ?></td>
+                            <td><?= htmlspecialchars($page['last_modified_time']); ?></td>
+                            <td>
+                                <a href="edit_page.php?page_id=<?= $page['page_id']; ?>" class="edit-btn">Edit</a>
+                                <a href="delete_page.php?page_id=<?= $page['page_id']; ?>" class="delete-btn" onclick="return confirm('Are you sure you want to delete this page?');">Delete</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         <?php else: ?>
-            <p>No celestial bodies found.</p>
+            <p class="no-data">No celestial bodies found.</p>
         <?php endif; ?>
     </main>
 </body>

@@ -135,12 +135,12 @@ nav ul li a:hover {
 }
 
 /* Main content styling */
-main {
-  padding-top: 260px; /* Give space for fixed navbar */
+.index_body {
+  padding-top: 100px; /* Give space for fixed navbar */
   text-align: center;
 }
 
-main h1 {
+.index_body h1 {
   margin-bottom: 2rem;
 }
 
@@ -224,19 +224,19 @@ footer {
 }
 
 /* Form elements styling */
-form div {
+.create form div {
   margin-bottom: 1rem;
 }
 
-label {
+.create label {
   display: block;
   margin-bottom: 0.5rem;
   color: black;
 }
 
-input[type="text"],
-input[type="file"],
-select {
+.create input[type="text"],
+.create input[type="file"],
+.create select {
   width: 100%;
   padding: 0.5rem;
   margin-bottom: 0.5rem;
@@ -250,7 +250,7 @@ select {
 }
 
 /* Submit button styling */
-input[type="submit"] {
+.create input[type="submit"] {
   background-color: #4d90fe;
   color: white;
   padding: 1rem 2rem;
@@ -261,18 +261,255 @@ input[type="submit"] {
   transition: background-color 0.3s;
 }
 
-input[type="submit"]:hover {
+.create input[type="submit"]:hover {
   background-color: #357abd;
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
-  main {
+  .create {
       padding: 1rem;
   }
 }
 
+/* Basic Resets */
 
+/* Main content area */
+.view {
+  padding-top: 2px; /* Adjust based on your navbar's height */
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Article styling */
+article {
+  border-radius: 10px;
+  margin-bottom: 2rem;
+  margin-top: 2rem;
+  padding: 5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.view article h1 {
+  margin-top: 5rem;
+  margin-bottom: 2rem;
+}
+
+/* Page actions for admin */
+.page-actions {
+  text-align: right;
+  margin-bottom: 1rem;
+}
+
+.page-actions a {
+  color: #4d90fe;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border: solid 1px #357abd;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.page-actions a:hover {
+  background-color: #357abd;
+}
+
+/* Image styling */
+.view article img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto 2rem;
+  border-radius: 5px;
+}
+
+/* Content Section */
+.view section {
+  text-align: left;
+  line-height: 1.6;
+}
+
+/* Error message styling */
+.main .view p {
+  background: #ff6b6b;
+  color: #fff;
+  padding: 1rem;
+  border-radius: 5px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+
+  .view article {
+      margin-bottom: 1rem;
+  }
+
+  .page-actions a {
+      display: block;
+      margin-bottom: 1rem;
+  }
+}
+
+/* Main content styles */
+.main-content {
+  padding: 2rem;
+  border-radius: 10px;
+  margin: 4rem auto;
+  max-width: 90%;
+  overflow-x: auto; /* Ensures the table is scrollable on small screens */
+}
+
+/* Table styles */
+.pages-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.pages-table th,
+.pages-table td {
+  text-align: left;
+  padding: 0.5rem;
+  border-bottom: 1px solid black;
+}
+
+.pages-table td:nth-child(3) {
+  max-width: 150px; /* Adjust the max-width as needed */
+  word-wrap: break-word; /* Ensures the text breaks to prevent overflow */
+  line-height: 1.5; /* Gives more vertical space to the text */
+  height: 3em; /* Sets a minimum height for the content cells */
+  overflow: hidden; /* Hides content that overflows the set height */
+  text-overflow: ellipsis; /* Adds an ellipsis to indicate hidden text */
+}
+
+.pages-table th {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.pages-table tbody tr:nth-child(odd) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Action button styles */
+.edit-btn,
+.delete-btn {
+   display: inline-block;
+  padding: 0.3rem 0.6rem;
+  margin-right: 0.5rem;
+  text-decoration: none;
+  color: #fff;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.edit-btn {
+  margin-right: 0.5rem; 
+  background-color: #4caf50; /* Green */
+}
+
+.delete-btn {
+  background-color: #f44336; /* Red */
+}
+
+.edit-btn:hover {
+  background-color: #388e3c; /* Darker Green */
+}
+
+.delete-btn:hover {
+  background-color: #d32f2f; /* Darker Red */
+}
+
+/* No data message */
+.no-data {
+  color: #ff6b6b;
+  text-align: center;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+      margin: 1rem;
+      padding: 1rem;
+  }
+}
+
+/* Main edit page styles */
+.edit {
+  padding: 2rem;
+  border-radius: 10px;
+  margin: 2rem auto;
+  max-width: 800px;
+  color: black;
+}
+
+.edit h1 {
+  margin-bottom: 1rem;
+}
+
+/* Edit form styles */
+.edit_form div {
+  margin-bottom: 1rem;
+}
+
+.edit_form label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.edit_form input[type="text"],
+.edit_form select,
+.edit_form input[type="file"] {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+/* Quill editor container */
+#editor-container {
+  height: 200px;
+  background: #fff;
+  color: #000;
+}
+
+/* Image preview styles */
+.edit-image-preview {
+  max-width: 20%;
+  height: auto;
+  display: block;
+  margin-top: 1rem;
+  border-radius: 5px;
+}
+
+/* Submit button styling */
+.edit_form input[type="submit"] {
+  background-color: #4d90fe;
+  color: white;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+.edit_form input[type="submit"]:hover {
+  background-color: #357abd;
+}
+
+/* Responsive design adjustments */
+@media (max-width: 768px) {
+  .edit {
+      padding: 1rem;
+      margin: 1rem;
+  }
+
+  .edit_form {
+      width: 90%;
+  }
+}
 
 /* Reset some default styles
 * {

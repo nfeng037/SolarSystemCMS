@@ -51,7 +51,7 @@ if (isset($_GET['page_id']) && filter_var($_GET['page_id'], FILTER_VALIDATE_INT)
     <header>
         <?php include 'navbar.php'; ?>
     </header>
-    <main>
+    <main class=“view”>
         <?php if ($pageData): ?>
         <article>
             <h1><?= htmlspecialchars($pageData['title']); ?></h1>

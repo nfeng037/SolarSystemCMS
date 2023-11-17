@@ -18,8 +18,12 @@ $success = '';
 
 $stmt = $pdo->query("SELECT category_id, category_name FROM categories");
 $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$title = ''; 
+$content = ''; 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $title = $_POST['name'] ?? ''; 
+    $content = $_POST['description'] ?? ''; 
     $name = trim($_POST['name']);
     $description = trim($_POST['description']);
     $category_id = $_POST['category'];
@@ -33,24 +37,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
         $image = $_FILES['image'];
         $temporaryPath = $image['tmp_name'];
-        $imageFilename = basename($image['name']);
-        $newPath = file_upload_path($image['name']);
-        $relativePath = file_upload_path($image['name'], 'uploads', true);
-
-        if (file_is_an_image($temporaryPath, $newPath)) {
-            if (move_uploaded_file($temporaryPath, $newPath)) {
-                $resizedFilename = 'resized_' . $imageFilename;
-                $resizedPath = file_upload_path($resizedFilename);
-                
-                if (resize_image($newPath, $resizedPath, 400)) {
-                    $resizedFilename = basename($resizedPath);
-                    $resizedRelativePath = 'uploads/' . $resizedFilename;
-                    $imageUploaded = true; 
-                } else {
-                    $error = 'Image could not be resized.';
-                }
+        $resizedFilename = 'resized_' . basename($image['name']);
+        $resizedPath = file_upload_path($resizedFilename); // Absolute path for resized image
+        $resizedRelativePath = file_upload_path($resizedFilename, 'uploads', true); // Relative path for resized image
+    
+        if (file_is_an_image($temporaryPath, $resizedPath)) {
+            if (resize_image($temporaryPath, $resizedPath, 400)) {
+                $imageUploaded = true; 
             } else {
-                $error = 'The file could not be uploaded.';
+                $error = 'Image could not be resized.';
             }
         } else {
             $error = 'The file is not a valid image.';
@@ -123,7 +118,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <form id="myForm" action="create_page.php" method="post" enctype="multipart/form-data">
             <div>
                 <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required>
+                <input type="text" id="name" name="name" required value="<?= htmlspecialchars($title); ?>">
             </div>
             
             <div>
@@ -162,6 +157,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         var quill = new Quill('#editor-container', {
             theme: 'snow'
         });
+        var storedContent = '<?= addslashes($content); ?>';
+        if (storedContent) {
+            quill.root.innerHTML = storedContent;
+        }
 
         document.addEventListener('DOMContentLoaded', (event) => {
             var form = document.querySelector('#myForm');

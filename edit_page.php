@@ -16,7 +16,6 @@ if (!isset($_SESSION['user_id']) || !checkUserRole('admin')) {
 $error = '';
 $success = '';
 
-// Get the page ID from a GET request or from the session
 $page_id = $_GET['page_id'] ?? $_SESSION['page_id_to_edit'];
 
 $stmt = $pdo->prepare("SELECT * FROM pages WHERE page_id = :page_id");
@@ -25,12 +24,16 @@ $page = $stmt->fetch(PDO::FETCH_ASSOC);
 
 $stmt = $pdo->query("SELECT category_id, category_name FROM categories");
 $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$title = $page['title']; 
+$content = $page['content']; 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = trim($_POST['name']);
     $description = trim($_POST['description']);
     $category_id = $_POST['category'];
-    $imageUploaded = false; // Flag to check if the image is uploaded and valid
+    $imageUploaded = false; 
+    $title = $_POST['name'] ?? $title;
+    $content = $_POST['description'] ?? $content;
 
     $config = HTMLPurifier_Config::createDefault();
     $purifier = new HTMLPurifier($config);
@@ -40,46 +43,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $image = $_FILES['image'];
         $temporaryPath = $image['tmp_name'];
         $imageFilename = basename($image['name']);
-        $newPath = file_upload_path($image['name']); // Absolute path
-        $relativePath = file_upload_path($image['name'], 'uploads', true); // Relative path
+        $resizedFilename = 'resized_' . $imageFilename;
+        $resizedPath = file_upload_path($resizedFilename); // Absolute path for resizing
     
         // Check if the file is an image
-        if (file_is_an_image($temporaryPath, $newPath)) {
-            if (move_uploaded_file($temporaryPath, $newPath)) {
-                $resizedFilename = 'resized_' . $imageFilename;
-                $resizedPath = file_upload_path($resizedFilename); // Absolute path for resizing
+        if (file_is_an_image($temporaryPath, $resizedPath)) {
+            if (resize_image($temporaryPath, $resizedPath, 400)) {
+                $resizedRelativePath = 'uploads/' . $resizedFilename; 
     
-                // Resize and save the image
-                if (resize_image($newPath, $resizedPath, 400)) {
-                    $resizedRelativePath = 'uploads/' . $resizedFilename; 
-    
-                    // Insert or Update image information into the images table with reference to the page
-                    $updateImageStmt = $pdo->prepare("UPDATE images SET file_name = :file_name WHERE page_id = :page_id");
-                    $updateImageStmt->execute([
-                        ':file_name' => $resizedRelativePath,
-                        ':page_id' => $page_id
-                    ]);
-                    
-                    // Update the pages table with the new image URL
-                    $stmt = $pdo->prepare("UPDATE pages SET image_url = :image_url WHERE page_id = :page_id");
-                    $stmt->execute([
-                        ':image_url' => $resizedRelativePath,
-                        ':page_id' => $page_id
-                    ]);
-    
-                    $imageUploaded = true;
-                } else {
-                    $error = 'Image could not be resized.';
-                }
+                // Insert or Update image information into the images table with reference to the page
+                $updateImageStmt = $pdo->prepare("UPDATE images SET file_name = :file_name WHERE page_id = :page_id");
+                $updateImageStmt->execute([
+                    ':file_name' => $resizedRelativePath,
+                    ':page_id' => $page_id
+                ]);
+                
+                $imageUploaded = true;
             } else {
-                $error = 'The file could not be uploaded.';
+                $error = 'Image could not be resized.';
             }
         } else {
             $error = 'The file is not a valid image.';
         }
-    }    
+    } 
+    
+    $deleteImage = isset($_POST['delete_image']) && $_POST['delete_image'] == '1';
 
-    // Proceed with updating the page only if there's no error
+    if ($deleteImage && !empty($page['image_url'])) {
+        // SQL query to remove image entry from the database
+        $stmt = $pdo->prepare("UPDATE pages SET image_url = NULL WHERE page_id = :page_id");
+        $stmt->execute([':page_id' => $page_id]);
+
+        // Delete the file from the file system
+        $imagePath = 'path/to/uploads/' . basename($page['image_url']);
+        if (file_exists($imagePath)) {
+            unlink($imagePath);
+        }
+
+        // Set flag to not process the rest of the image upload logic
+        $imageUploaded = false;
+    }
+
     if (!$error) {
         $pdo->beginTransaction();
 
@@ -94,7 +98,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             ]);
 
             if ($imageUploaded) {
-                // Update the pages table with the new image URL
                 $updatePageStmt = $pdo->prepare("UPDATE pages SET image_url = :image_url WHERE page_id = :page_id");
                 $updatePageStmt->execute([
                     ':image_url' => $resizedRelativePath,
@@ -139,7 +142,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
     <?php include 'navbar.php'; ?>
 
-    <main>
+    <main class="edit">
         <h1>Edit Page - <?= $page['title'] ?></h1>
         
         <!-- Error or success messages -->
@@ -150,10 +153,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <p class="success"><?= $success; ?></p>
         <?php endif; ?>
 
-        <form id="editForm" action="edit_page.php?page_id=<?= $page_id; ?>" method="post" enctype="multipart/form-data">
+        <form class="edit_form" id="editForm" action="edit_page.php?page_id=<?= $page_id; ?>" method="post" enctype="multipart/form-data">
             <div>
                 <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required value="<?= htmlspecialchars($page['title']); ?>">
+                <input type="text" id="name" name="name" required value="<?= htmlspecialchars($title); ?>">
             </div>
             
             <div>
@@ -170,14 +173,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div>
                 <label for="description">Description:</label>
                 <!-- Include the Quill editor container -->
-                <div id="editor-container"><?= $page['content']; ?></div>
-                <input type="hidden" name="description" id="hidden-description">
+                <div id="editor-container"><?= htmlspecialchars($content); ?></div>
+                <input type="hidden" name="description" id="hidden-description" value="<?= htmlspecialchars($content); ?>">
             </div>
             
             <div>
                 <label for="image">Change Image (optional):</label>
                 <input type="file" id="image" name="image">
+            </div>
+
+            <div>
                 <?php if (!empty($page['image_url'])): ?>
+                    <label for="delete_image">Delete Current Image:</label>
+                    <input type="checkbox" id="delete_image" name="delete_image" value="1">
                     <img src="<?= htmlspecialchars($page['image_url']); ?>" alt="Current Image" class="edit-image-preview">
                 <?php endif; ?>
             </div>
@@ -194,6 +202,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         var quill = new Quill('#editor-container', {
             theme: 'snow'
         });
+
+        quill.root.innerHTML = '<?= addslashes($content); ?>';
 
         document.addEventListener('DOMContentLoaded', (event) => {
             var form = document.querySelector('#editForm');
