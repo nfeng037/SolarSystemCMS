@@ -2,41 +2,29 @@
 // view.php
 
 session_start();
+require 'db_connect.php';
+require_once 'check_access.php';
 
-require 'db_connect.php'; 
-require 'check_access.php';
+$error = $_SESSION['error'] ?? '';
+unset($_SESSION['error']); 
 
-// Initialize variables
+$page_id = filter_input(INPUT_GET, 'page_id', FILTER_SANITIZE_NUMBER_INT);
+$isAdmin = isset($_SESSION['user_id']) && checkUserRole('admin');
 $pageData = null;
-$error = '';
-$isAdmin = checkUserRole('admin');
 
-// Check if a page_id is provided and it's a valid integer
-if (isset($_GET['page_id']) && filter_var($_GET['page_id'], FILTER_VALIDATE_INT)) {
-    $page_id = $_GET['page_id'];
-    
-    // Prepare a SELECT statement to fetch the page data including the image URL
-    $stmt = $pdo->prepare("SELECT title, content, image_url FROM pages WHERE page_id = :page_id");
-    
-    // Bind the page_id parameter
-    $stmt->bindParam(':page_id', $page_id, PDO::PARAM_INT);
-    
-    try {
-        // Execute the query
-        $stmt->execute();
-        
-        // Fetch the page data
+if ($page_id) {
+    $stmt = $pdo->prepare("SELECT title, content, image_url FROM pages WHERE page_id = ?");
+    if ($stmt->execute([$page_id])) {
         $pageData = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        // Check if the page entry was found
+
         if (!$pageData) {
             $error = "Page not found.";
         }
-    } catch (PDOException $e) {
-        $error = "Error fetching the page: " . $e->getMessage();
+    } else {
+        $error = "Error executing query.";
     }
 } else {
-    $error = "No page ID provided or invalid ID.";
+    $error = "Invalid page ID.";
 }
 
 ?>
@@ -47,29 +35,35 @@ if (isset($_GET['page_id']) && filter_var($_GET['page_id'], FILTER_VALIDATE_INT)
     <title><?= htmlspecialchars($pageData['title'] ?? 'Page Not Found'); ?></title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <header>
-        <?php include 'navbar.php'; ?>
-    </header>
-    <main class=“view”>
-        <?php if ($pageData): ?>
-        <article>
-            <h1><?= htmlspecialchars($pageData['title']); ?></h1>
-            <?php if ($isAdmin): ?>
-                <section class="page-actions">
-                    <a href="edit_page.php?page_id=<?= $page_id; ?>">Edit</a>
-                    <a href="delete_page.php?page_id=<?= $page_id; ?>" onclick="return confirm('Are you sure you want to delete this page?');">Delete</a>
+<body class="user">
+    <?php include 'navbar.php'; ?>
+    <main class="view">
+        <?php if ($error): ?>
+            <p class="error"><?= htmlspecialchars($error); ?></p>
+        <?php elseif ($pageData): ?>
+            <article>
+                <h1><?= htmlspecialchars($pageData['title']); ?></h1>
+                <?php if ($isAdmin): ?>
+                    <section class="page-actions">
+                        <a href="edit_page.php?page_id=<?= $page_id; ?>">Edit</a>
+                        <a href="delete_page.php?page_id=<?= $page_id; ?>" onclick="return confirm('Are you sure you want to delete this page?');">Delete</a>
+                    </section>
+                <?php endif; ?>
+                <?php if (!empty($pageData['image_url'])): ?>
+                    <img src="<?= htmlspecialchars($pageData['image_url']); ?>" alt="Image for <?= htmlspecialchars($pageData['title']); ?>">
+                <?php endif; ?>
+                <section>
+                    <?= $pageData['content']; ?>
                 </section>
-            <?php endif; ?>
-            <?php if (!empty($pageData['image_url'])): ?>
-                <img src="<?= htmlspecialchars($pageData['image_url']); ?>" alt="Image for <?= htmlspecialchars($pageData['title']); ?>">
-            <?php endif; ?>
-            <section>
-                <?= $pageData['content']; ?>
+            </article>
+            <section class="comments">
+                <h2>Leave a Comment</h2>
+                <form action="comment_processor.php" method="post">
+                    <input type="hidden" name="page_id" value="<?= $page_id; ?>">
+                    <textarea name="comment_content" required></textarea>
+                    <button type="submit">Submit Comment</button>
+                </form>
             </section>
-        </article>
-        <?php else: ?>
-            <p><?= $error; ?></p>
         <?php endif; ?>
     </main>
 </body>
