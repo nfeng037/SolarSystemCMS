@@ -52,7 +52,11 @@ try {
                     <?php foreach ($categories as $index => $category): ?>
                         <tr>
                             <td><?= $index + 1; ?></td>
-                            <td><?= $category['category_name']; ?></a></td>
+                            <td>
+                                <a href="category_pages.php?category_id=<?= $category['category_id']; ?>">
+                                    <?= htmlspecialchars($category['category_name']); ?>
+                                </a>
+                            </td>
                             <td>
                                 <a href="edit_category.php?category_id=<?= $category['category_id']; ?>" class="edit-btn">Edit</a>
                                 <a href="delete_category.php?category_id=<?= $category['category_id']; ?>" class="delete-btn" onclick="return confirm('Are you sure you want to delete this category?');">Delete</a>

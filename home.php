@@ -27,15 +27,15 @@ $pages = $stmt->fetchAll();
     </section>
     <!-- Gallery -->
     <section class="gallery">
-      <h2>News & Updates</h2>
+      <h2>Gallery</h2>
       <div class="article-container">
           <?php if (!empty($pages)): ?>
               <?php 
                   $counter = 0; 
                   foreach ($pages as $page):
-                      if ($counter >= 8) break; 
+                      if ($counter >= 9) break; 
                       $content = $page['content'];
-                      $isLong = mb_strlen($content) > 200; 
+                      $isLong = mb_strlen($content) > 150; 
               ?>
                   <article>
                     <a href="view.php?page_id=<?= $page['page_id']; ?>"> 
@@ -43,7 +43,7 @@ $pages = $stmt->fetchAll();
                     </a>
                     <h3><?= htmlspecialchars($page['title']); ?></h3>
                     <p>
-                        <?= mb_substr($content, 0, 200); ?> 
+                        <?= mb_substr($content, 0, 150); ?> 
                         <?php if ($isLong): ?>
                             ... <a href="view.php?page_id=<?= $page['page_id']; ?>">read more</a> 
                         <?php endif; ?>

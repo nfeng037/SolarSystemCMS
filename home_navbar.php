@@ -6,7 +6,7 @@ require 'check_access.php';
 
 function getCategories() {
     global $pdo; 
-    $stmt = $pdo->query("SELECT category_name FROM categories");
+    $stmt = $pdo->query("SELECT * FROM categories");
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
@@ -66,7 +66,7 @@ if(isset($_GET['action']) && $_GET['action'] == 'get_categories') {
                 try {
                     var categories = JSON.parse(this.responseText);
                     var output = categories.map(function(cat) {
-                        return '<li>' + cat.category_name + '</li>';
+                        return '<li><a href="category_pages.php?category_id=' + cat.category_id + '">' + cat.category_name + '</a></li>';
                     }).join('');
                     document.getElementById('categoryList').innerHTML = output;
                     document.getElementById('categoryPopup').style.display = 'block';

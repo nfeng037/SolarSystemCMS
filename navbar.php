@@ -13,7 +13,7 @@ require_once 'check_access.php';
             <li><a href="create_page.php">Create New</a></li>
             <li><a href="list_pages.php">All Pages</a></li>
             <li><a href="list_categories.php">Categories</a></li>
-            <li><a href="#">Comments</a></li>
+            <li><a href="list_comments.php">Comments</a></li>
             <li><a href="home.php">User Page</a></li>
         </ul>
         <div class="auth">

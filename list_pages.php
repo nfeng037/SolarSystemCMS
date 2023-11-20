@@ -40,7 +40,9 @@ try {
     </header>
     <main class="main-content">
         <h1>Pages List</h1>
-        
+        <div class="admin-links">
+                <a href="create_page.php">Create New</a>
+        </div>
         <?php if (!empty($pages)): ?>
             <table class="pages-table">
                 <thead>
@@ -72,7 +74,12 @@ try {
                             <td><?= $index + 1; ?></td>
                             <td><a href="view.php?page_id=<?= $page['page_id']; ?>"><?= htmlspecialchars($page['title']); ?></a></td>
                             <td><?= htmlspecialchars($page['category_name']); ?></td>
-                            <td><?= $page['content']; ?></td>
+                            <td>
+                                <?= mb_substr($page['content'], 0, 200); ?>
+                                <?php if(mb_strlen($page['content']) > 200): ?>
+                                    ...<a href="view.php?page_id=<?= $page['page_id'];?>">read more</a>
+                                <?php endif; ?>
+                            </td>
                             <td><?= htmlspecialchars($page['creation_time']); ?></td>
                             <td><?= htmlspecialchars($page['last_modified_time']); ?></td>
                             <td>

@@ -1,6 +1,5 @@
 <?php
-// delete_category.php
-
+//delete_comment.php
 
 session_start();
 
@@ -13,22 +12,22 @@ if (!isset($_SESSION['user_id']) || !checkUserRole('admin')) {
     exit;
 }
 
-if (isset($_GET['category_id'])) {
-    $category_id = $_GET['category_id'];
+if (isset($_GET['comment_id'])) {
+    $comment_id = $_GET['comment_id'];
     
     try {
         $pdo->beginTransaction();
 
-        $stmt = $pdo->prepare("DELETE FROM categories WHERE category_id = :category_id");
-        $stmt->execute([':category_id' => $category_id]);
+        $stmt = $pdo->prepare("DELETE FROM comments WHERE comment_id = :comment_id");
+        $stmt->execute([':comment_id' => $comment_id]);
     
         $pdo->commit();
         
-        header("Location: list_categories.php");
+        header("Location: list_comments.php");
         exit;
     } catch (PDOException $e) {
         $pdo->rollback();
-        error_log("Error deleting category: " . $e->getMessage()); // Log the exception message
+        error_log("Error deleting comment: " . $e->getMessage()); // Log the exception message
         exit;
     }
 } else {

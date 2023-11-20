@@ -61,8 +61,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $category_id) {
 <body>
     <header>
             <?php include 'navbar.php'; ?>
-    </heade>
-    <main>
+    </header>
+    <main class="edit">
         <h1>Edit Category</h1>
         
         <?php if ($error): ?>
@@ -72,7 +72,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $category_id) {
             <p class="success"><?= htmlspecialchars($success); ?></p>
         <?php endif; ?>
 
-        <form action="edit_category.php?category_id=<?= htmlspecialchars($category_id); ?>" method="post">
+        <form class="edit_form" action="edit_category.php?category_id=<?= htmlspecialchars($category_id); ?>" method="post">
             <div>
                 <label for="name">Category Name:</label>
                 <input type="text" id="name" name="name" required value="<?= htmlspecialchars($category_name); ?>">
