@@ -2,7 +2,6 @@
 // search_results.php
 
 session_start();
-
 require 'db_connect.php';
 
 $query = isset($_GET['query']) ? $_GET['query'] : '';
@@ -10,21 +9,14 @@ $filteredResults = [];
 
 if (!empty($query)) {
     try {
-        // Fetch all pages from the database
-        $stmt = $pdo->prepare("SELECT * FROM pages");
-        $stmt->execute();
-        $searchResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $searchQuery = '%' . $query . '%';
+        $stmt = $pdo->prepare("SELECT * FROM pages WHERE title LIKE ? OR content LIKE ?");
+        $stmt->execute([$searchQuery, $searchQuery]);
+        $filteredResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Filter the results based on the stripped content
-        foreach ($searchResults as $page) {
-            $plainContent = strip_tags($page['content']);
-            if (stripos($plainContent, $query) !== false || stripos($page['title'], $query) !== false) {
-                $filteredResults[] = $page;
-            }
-        }
     } catch (PDOException $e) {
         $error = "Database error: " . $e->getMessage();
-        echo $error;  // Display error for debugging (remove or handle differently in production)
+        echo '<p class="error">' . $error . '</p>';
     }
 }
 ?>
@@ -52,11 +44,11 @@ if (!empty($query)) {
                     <?php foreach ($filteredResults as $page): ?>
                         <tr>
                             <td><a href="view.php?page_id=<?= htmlspecialchars($page['page_id']); ?>"><?= htmlspecialchars($page['title']); ?></a></td>
-                            <td><?= mb_substr($page['content'], 0, 200); ?>
-                            <?php if(mb_strlen($page['content']) > 200): ?>
-                                    ...<a href="view.php?page_id=<?= $page['page_id'];?>">read more</a>
+                            <td><?= mb_substr($page['content'], 0, 160); ?>
+                            <?php if(mb_strlen($page['content']) > 160): ?>
+                                    ...<a href="view.php?page_id=<?= htmlspecialchars($page['page_id']); ?>">read more</a>
                                 <?php endif; ?>
-                        </td>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

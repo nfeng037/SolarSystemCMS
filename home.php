@@ -33,9 +33,7 @@ $pages = $stmt->fetchAll();
               <?php 
                   $counter = 0; 
                   foreach ($pages as $page):
-                      if ($counter >= 9) break; 
-                      $content = $page['content'];
-                      $isLong = mb_strlen($content) > 150; 
+                      if ($counter >= 8) break; 
               ?>
                   <article>
                     <a href="view.php?page_id=<?= $page['page_id']; ?>"> 
@@ -43,8 +41,8 @@ $pages = $stmt->fetchAll();
                     </a>
                     <h3><?= htmlspecialchars($page['title']); ?></h3>
                     <p>
-                        <?= mb_substr($content, 0, 150); ?> 
-                        <?php if ($isLong): ?>
+                        <?= mb_substr(($page['content']), 0, 120); ?> 
+                        <?php if (mb_strlen($page['content']) > 120): ?>
                             ... <a href="view.php?page_id=<?= $page['page_id']; ?>">read more</a> 
                         <?php endif; ?>
                     </p>

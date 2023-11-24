@@ -24,26 +24,23 @@ $pages = $stmt->fetchAll();
         <h2>Gallery</h2>
         <div class="article-container">
             <?php if (!empty($pages)): ?>
-                <?php 
-                    foreach ($pages as $page):
-                        $content = $page['content'];
-                        $isLong = mb_strlen($content) > 150; 
-                ?>
+                <?php foreach ($pages as $page): ?>
                     <article>
-                        <a href="view.php?page_id=<?= $page['page_id']; ?>"> 
-                        <img src="<?= htmlspecialchars($page['image_url']); ?>" alt="<?= htmlspecialchars($page['title']); ?>">
-                        </a>
-                        <h3><?= htmlspecialchars($page['title']); ?></h3>
+                        <?php if (!empty($page['image_url'])): ?>
+                            <a href="view.php?page_id=<?= htmlspecialchars($page['page_id']); ?>"> 
+                                <img src="<?= htmlspecialchars($page['image_url']); ?>" alt="<?= htmlspecialchars($page['title']); ?>">
+                            </a>
+                        <?php endif; ?>
+
+                        <h3><a href="view.php?page_id=<?= htmlspecialchars($page['page_id']); ?>"><?= htmlspecialchars($page['title']); ?></a> </h3>
                         <p>
-                            <?= mb_substr($content, 0, 150); ?> 
-                            <?php if ($isLong): ?>
-                                ... <a href="view.php?page_id=<?= $page['page_id']; ?>">read more</a> 
+                            <?= mb_substr($page['content'], 0, 120); ?> 
+                            <?php if (mb_strlen($page['content']) > 120): ?>
+                                ... <a href="view.php?page_id=<?= htmlspecialchars($page['page_id']); ?>">read more</a> 
                             <?php endif; ?>
                         </p>
                     </article>
-                <?php 
-                    endforeach; 
-                ?>
+                <?php endforeach; ?>
             <?php else: ?>
                 <p>No result found.</p>
             <?php endif; ?>

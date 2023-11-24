@@ -14,9 +14,7 @@ $isAdmin = isset($_SESSION['user_id']) && checkUserRole('admin');
 $pageData = null;
 $comments = [];
 
-// Fetch page data and comments, this should be done regardless of POST or GET
 if ($page_id) {
-    // Fetch page data
     $stmt = $pdo->prepare("SELECT * FROM pages WHERE page_id = ?");
     if ($stmt->execute([$page_id])) {
         $pageData = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -27,7 +25,6 @@ if ($page_id) {
         $error = "Error executing query.";
     }
 
-    // Fetch comments (including guest name if available)
     if (!$error) {
         $stmt = $pdo->prepare("SELECT comments.*, users.username FROM comments LEFT JOIN users ON comments.user_id = users.user_id WHERE comments.page_id = :page_id ORDER BY comments.creation_time DESC");
         $stmt->bindParam(':page_id', $page_id, PDO::PARAM_INT);
@@ -38,7 +35,6 @@ if ($page_id) {
     $error = "Invalid page ID.";
 }
 
-// Process POST request for adding a comment
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page_id && isset($_POST['comment_content'])) {
     $commentContent = trim($_POST['comment_content']);
 
@@ -46,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page_id && isset($_POST['comment_c
         $user_id = $_SESSION['user_id'] ?? null;
         $guest_name = isset($_POST['comment_name']) ? trim($_POST['comment_name']) : null;
 
-        if (isset($_POST['captcha']) && $_POST['captcha'] == $_SESSION['captcha']) {
+        if (isset($_POST['captcha']) && strtolower($_POST['captcha']) == strtolower($_SESSION['captcha'])) {
             $stmt = $pdo->prepare("INSERT INTO comments (user_id, page_id, content, guest_name) VALUES (:user_id, :page_id, :content, :guest_name)");
             $stmt->bindParam(':user_id', $user_id);
             $stmt->bindParam(':page_id', $page_id, PDO::PARAM_INT);

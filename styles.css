@@ -4,14 +4,6 @@ body, html {
   font-family: Arial, sans-serif;
 }
 
-body {
-  cursor: url('./images/rocket.png'), auto;
-}
-
-a {
-  cursor: url('./images/planet.png'), pointer;
-}
-
 *, *:before, *:after {
   box-sizing: border-box;
 }
@@ -614,6 +606,7 @@ footer {
     font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
     background-color: #000;
     color: #fff;
+    cursor: url('./images/rocket.png'), auto;
   }
   
   .user main {
@@ -641,6 +634,10 @@ footer {
     color: #fff;
     text-decoration: none;
   }
+
+  .user a {
+    cursor: url('./images/planet.png'), pointer;
+  }  
 
   #categoryPopup {
     display: none;

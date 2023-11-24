@@ -4,14 +4,14 @@
 require_once 'db_connect.php';
 require 'check_access.php';
 
-function getCategories() {
-    global $pdo; 
-    $stmt = $pdo->query("SELECT * FROM categories");
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-
+// This part can be moved to a separate file for handling AJAX requests
 if(isset($_GET['action']) && $_GET['action'] == 'get_categories') {
+    function getCategories() {
+        global $pdo; 
+        $stmt = $pdo->query("SELECT * FROM categories");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     $categories = getCategories();
     echo json_encode($categories); 
     exit;
@@ -44,8 +44,6 @@ if(isset($_GET['action']) && $_GET['action'] == 'get_categories') {
         <?php endif; ?>
     </div>
 </nav>
-
-
 
 <script>
     function toggleCategories() {
@@ -84,5 +82,4 @@ if(isset($_GET['action']) && $_GET['action'] == 'get_categories') {
 
         xhr.send();
     }
-
 </script>

@@ -47,8 +47,6 @@ try {
                 <?php if (!empty($pages)): ?>
                     <?php 
                             foreach ($pages as $page):
-                                $content = $page['content'];
-                                $isLong = mb_strlen($content) > 150; 
                         ?>
                             <article>
                                 <a href="view.php?page_id=<?= $page['page_id']; ?>"> 
@@ -56,8 +54,8 @@ try {
                                 </a>
                                 <h3><?= htmlspecialchars($page['title']); ?></h3>
                                 <p>
-                                    <?= mb_substr($content, 0, 150); ?> 
-                                    <?php if ($isLong): ?>
+                                    <?= mb_substr(($page['content']), 0, 120); ?> 
+                                    <?php if (mb_strlen($page['content']) > 120): ?>
                                         ... <a href="view.php?page_id=<?= $page['page_id']; ?>">read more</a> 
                                     <?php endif; ?>
                                 </p>
