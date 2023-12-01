@@ -3,10 +3,12 @@
 
 session_start();
 require 'db_connect.php';
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
 $query = filter_input(INPUT_GET, 'query', FILTER_SANITIZE_SPECIAL_CHARS) ?: '';
-$category = filter_input(INPUT_GET, 'category', FILTER_SANITIZE_SPECIAL_CHARS) ?: 'all';
-$resultsPerPage = 2;
+$searchCategory = filter_input(INPUT_GET, 'category', FILTER_SANITIZE_SPECIAL_CHARS) ?: 'all';
+$resultsPerPage = 3;
 $currentPage = 1; 
 
 if (isset($_GET['page'])) {
@@ -20,17 +22,19 @@ $start = ($currentPage - 1) * $resultsPerPage;
 if (!empty($query)) {
     try {
         $searchQuery = '%' . $query . '%';
-        if ($category === 'all') {
+        if ($searchCategory === 'all') {
             $stmt = $pdo->prepare("SELECT * FROM pages WHERE title LIKE ? OR content LIKE ? LIMIT ?, ?");
             $stmt->execute([$searchQuery, $searchQuery, $start, $resultsPerPage]);
+            $totalResultsStmt = $pdo->prepare("SELECT COUNT(*) FROM pages WHERE title LIKE ? OR content LIKE ?");
+            $totalResultsStmt->execute([$searchQuery, $searchQuery]);
         } else {
             $stmt = $pdo->prepare("SELECT * FROM pages WHERE (title LIKE ? OR content LIKE ?) AND category_id = ? LIMIT ?, ?");
-            $stmt->execute([$searchQuery, $searchQuery, $category, $start, $resultsPerPage]);
+            $stmt->execute([$searchQuery, $searchQuery, $searchCategory, $start, $resultsPerPage]);
+            $totalResultsStmt = $pdo->prepare("SELECT COUNT(*) FROM pages WHERE (title LIKE ? OR content LIKE ?) AND category_id = ?");
+            $totalResultsStmt->execute([$searchQuery, $searchQuery, $searchCategory]);
         }
+        
         $filteredResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $totalResultsStmt = $pdo->prepare("SELECT COUNT(*) FROM pages WHERE title LIKE ? OR content LIKE ?");
-        $totalResultsStmt->execute([$searchQuery, $searchQuery]);
         $totalResults = $totalResultsStmt->fetchColumn();
         $totalPages = ceil($totalResults / $resultsPerPage);
 
@@ -74,19 +78,21 @@ if (!empty($query)) {
                 </tbody>
             </table>
             <?php if ($totalResults > $resultsPerPage): ?>
+                
                 <div class="pagination">
                     <?php if ($currentPage > 1): ?>
-                        <a href="?query=<?= urlencode($query) ?>&page=<?= max(1, $currentPage - 1) ?>">Previous</a>
+                        <a href="?query=<?= urlencode($query) ?>&category=<?= urlencode($searchCategory) ?>&page=<?= max(1, $currentPage - 1) ?>">Previous</a>
                     <?php endif; ?>
 
                     <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                        <a href="?query=<?= urlencode($query) ?>&page=<?= $i ?>"><?= $i ?></a>
+                        <a href="?query=<?= urlencode($query) ?>&category=<?= urlencode($searchCategory) ?>&page=<?= $i ?>"><?= $i ?></a>
                     <?php endfor; ?>
 
                     <?php if ($currentPage < $totalPages): ?>
-                        <a href="?query=<?= urlencode($query) ?>&page=<?= (int)($currentPage + 1) ?>">Next</a>
+                        <a href="?query=<?= urlencode($query) ?>&category=<?= urlencode($searchCategory) ?>&page=<?= (int)($currentPage + 1) ?>">Next</a>
                     <?php endif; ?>
                 </div>
+
             <?php endif; ?>
         <?php else: ?>
             <p>No results found for "<?php echo htmlspecialchars($query); ?>".</p>
