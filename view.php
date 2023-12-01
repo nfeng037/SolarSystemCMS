@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page_id && isset($_POST['comment_c
 
     if ($commentContent) {
         $user_id = $_SESSION['user_id'] ?? null;
-        $guest_name = isset($_POST['comment_name']) ? trim($_POST['comment_name']) : null;
+        $guest_name = isset($_POST['comment_name']) && !empty($_POST['comment_name']) ? trim($_POST['comment_name']) : 'Anonymous';
 
         if (isset($_POST['captcha']) && strtolower($_POST['captcha']) == strtolower($_SESSION['captcha'])) {
             $stmt = $pdo->prepare("INSERT INTO comments (user_id, page_id, content, guest_name) VALUES (:user_id, :page_id, :content, :guest_name)");
@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page_id && isset($_POST['comment_c
                 <form action="view.php?page_id=<?= $page_id; ?>" method="post">
                     <input type="hidden" name="page_id" value="<?= $page_id; ?>">
                     <?php if (!isset($_SESSION['user_id'])): ?>
-                        <input type="text" name="comment_name" placeholder="Your name" value="<?= htmlspecialchars($_POST['comment_name'] ?? ''); ?>" required>
+                        <input type="text" name="comment_name" placeholder="Your name" value="<?= htmlspecialchars($_POST['comment_name'] ?? ''); ?>">
                     <?php endif; ?>
                     <textarea name="comment_content" placeholder="Enter your comments..." required><?= htmlspecialchars($commentContent); ?></textarea>
                     <img src="captcha_generator.php" alt="CAPTCHA" />

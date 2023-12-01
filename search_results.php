@@ -4,15 +4,35 @@
 session_start();
 require 'db_connect.php';
 
-$query = isset($_GET['query']) ? $_GET['query'] : '';
-$filteredResults = [];
+$query = filter_input(INPUT_GET, 'query', FILTER_SANITIZE_SPECIAL_CHARS) ?: '';
+$category = filter_input(INPUT_GET, 'category', FILTER_SANITIZE_SPECIAL_CHARS) ?: 'all';
+$resultsPerPage = 2;
+$currentPage = 1; 
+
+if (isset($_GET['page'])) {
+    $pageParam = $_GET['page'];
+    if (is_numeric($pageParam) && $pageParam > 0) {
+        $currentPage = (int)$pageParam;
+    }
+}
+$start = ($currentPage - 1) * $resultsPerPage;
 
 if (!empty($query)) {
     try {
         $searchQuery = '%' . $query . '%';
-        $stmt = $pdo->prepare("SELECT * FROM pages WHERE title LIKE ? OR content LIKE ?");
-        $stmt->execute([$searchQuery, $searchQuery]);
+        if ($category === 'all') {
+            $stmt = $pdo->prepare("SELECT * FROM pages WHERE title LIKE ? OR content LIKE ? LIMIT ?, ?");
+            $stmt->execute([$searchQuery, $searchQuery, $start, $resultsPerPage]);
+        } else {
+            $stmt = $pdo->prepare("SELECT * FROM pages WHERE (title LIKE ? OR content LIKE ?) AND category_id = ? LIMIT ?, ?");
+            $stmt->execute([$searchQuery, $searchQuery, $category, $start, $resultsPerPage]);
+        }
         $filteredResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $totalResultsStmt = $pdo->prepare("SELECT COUNT(*) FROM pages WHERE title LIKE ? OR content LIKE ?");
+        $totalResultsStmt->execute([$searchQuery, $searchQuery]);
+        $totalResults = $totalResultsStmt->fetchColumn();
+        $totalPages = ceil($totalResults / $resultsPerPage);
 
     } catch (PDOException $e) {
         $error = "Database error: " . $e->getMessage();
@@ -53,6 +73,21 @@ if (!empty($query)) {
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            <?php if ($totalResults > $resultsPerPage): ?>
+                <div class="pagination">
+                    <?php if ($currentPage > 1): ?>
+                        <a href="?query=<?= urlencode($query) ?>&page=<?= max(1, $currentPage - 1) ?>">Previous</a>
+                    <?php endif; ?>
+
+                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                        <a href="?query=<?= urlencode($query) ?>&page=<?= $i ?>"><?= $i ?></a>
+                    <?php endfor; ?>
+
+                    <?php if ($currentPage < $totalPages): ?>
+                        <a href="?query=<?= urlencode($query) ?>&page=<?= (int)($currentPage + 1) ?>">Next</a>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
         <?php else: ?>
             <p>No results found for "<?php echo htmlspecialchars($query); ?>".</p>
         <?php endif; ?>

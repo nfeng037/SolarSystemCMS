@@ -4,19 +4,31 @@
 require_once 'db_connect.php';
 require 'check_access.php';
 
-// This part can be moved to a separate file for handling AJAX requests
+$categories = []; 
+
 if(isset($_GET['action']) && $_GET['action'] == 'get_categories') {
-    function getCategories() {
+    try {
         global $pdo; 
         $stmt = $pdo->query("SELECT * FROM categories");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        echo json_encode($categories); 
+        exit;
+    } catch (PDOException $e) {
+        echo 'Database error: ' . $e->getMessage();
+        exit;
     }
-
-    $categories = getCategories();
-    echo json_encode($categories); 
-    exit;
 }
+
+try {
+    global $pdo; 
+    $stmt = $pdo->query("SELECT * FROM categories");
+    $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    echo 'Database error: ' . $e->getMessage();
+}
+
 ?>
+
 
 <!-- Navigation bar -->
 <nav>
@@ -34,6 +46,14 @@ if(isset($_GET['action']) && $_GET['action'] == 'get_categories') {
     </ul>
     <form class="search" action="search_results.php" method="get">
         <input type="search" name="query" placeholder="SEARCH" aria-label="Search through site content">
+
+        <select name="category">
+            <option value="all">All categories</option>
+            <?php foreach($categories as $category): ?>
+                <option value="<?=htmlspecialchars($category['category_id'])?>"><?= htmlspecialchars($category['category_name'])?></option>
+            <?php endforeach; ?>
+        </select>
+        
         <input type="submit" value="SEARCH">
     </form>
     <div class="auth">

@@ -606,7 +606,6 @@ footer {
     font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
     background-color: #000;
     color: #fff;
-    cursor: url('./images/rocket.png'), auto;
   }
   
   .user main {
@@ -635,9 +634,7 @@ footer {
     text-decoration: none;
   }
 
-  .user a {
-    cursor: url('./images/planet.png'), pointer;
-  }  
+
 
   #categoryPopup {
     display: none;
