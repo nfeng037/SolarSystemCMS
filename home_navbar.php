@@ -29,77 +29,58 @@ try {
 
 ?>
 
+<nav class="navbar navbar-expand-lg bg-black" data-bs-theme="dark">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="home.php">HOME</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="all_pages.php">GALLERY</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        CATEGORIES
+                    </a>
+                    <ul class="dropdown-menu">
+                        <?php foreach($categories as $category): ?>
+                        <li><a class="dropdown-item"
+                                href="category_pages.php?category_id=<?= $category['category_id']; ?>"><?= htmlspecialchars($category['category_name'])?></a>
+                        </li>
+                        <?php endforeach; ?>
 
-<!-- Navigation bar -->
-<nav>
-    <ul>
-        <li><a href="home.php">HOME</a></li>
-        <li><a href="all_pages.php">GALLERY</a></li>
-        <li><a href="javascript:void(0)" id="categoryLink" onclick="toggleCategories()">CATEGORIES</a></li>
+                    </ul>
+                </li>
+                <?php if (isset($_SESSION['user_id']) && checkUserRole('admin')): ?>
+                    <li><a class="nav-link" href="index.php">ADMIN</a></li>
+                <?php endif; ?>
+            </ul>
+            <form class="search d-flex justify-content-around" action="search_results.php" method="get">
+                <input class="form-control m-2" type="search" name="query" placeholder="SEARCH"
+                    aria-label="Search through site content">
 
-        <div id="categoryPopup">
-            <ul id="categoryList"></ul>
+                <select name="category" class="m-2 rounded-2 p-2 form-select form-select-sm">
+                    <option value="all">ALL CATEGORIES</option>
+                    <?php foreach($categories as $category): ?>
+                    <option value="<?=htmlspecialchars($category['category_id'])?>">
+                        <?= htmlspecialchars($category['category_name'])?></option>
+                    <?php endforeach; ?>
+                </select>
+
+                <input type="submit" value="SEARCH" class="btn btn-primary m-2">
+            </form>
+            <div class="m-2">
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <a href="logout.php" role="button" class="btn btn-outline-dark text-nowrap">SIGN OUT</a>
+                <?php else: ?>
+                    <a href="login.php" role="button" class="btn btn-outline-dark text-nowrap">SIGN IN</a>
+                <?php endif; ?>
+            </div>
         </div>
-        <?php if (isset($_SESSION['user_id']) && checkUserRole('admin')): ?>
-            <li><a href="index.php">ADMIN</a></li>
-        <?php endif; ?>
-    </ul>
-    <form class="search" action="search_results.php" method="get">
-        <input type="search" name="query" placeholder="SEARCH" aria-label="Search through site content">
-
-        <select name="category">
-            <option value="all">All categories</option>
-            <?php foreach($categories as $category): ?>
-                <option value="<?=htmlspecialchars($category['category_id'])?>"><?= htmlspecialchars($category['category_name'])?></option>
-            <?php endforeach; ?>
-        </select>
-        
-        <input type="submit" value="SEARCH">
-    </form>
-    <div class="auth">
-        <?php if (isset($_SESSION['user_id'])): ?>
-            <a href="logout.php">SIGN OUT</a>
-        <?php else: ?>
-            <a href="login.php">SIGN IN</a>
-        <?php endif; ?>
     </div>
 </nav>
-
-<script>
-    function toggleCategories() {
-        var popup = document.getElementById('categoryPopup');
-        if (popup.style.display === 'block') {
-            popup.style.display = 'none';
-        } else {
-            fetchCategories();
-        }
-    }
-
-    function fetchCategories() {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'home_navbar.php?action=get_categories', true);
-
-        xhr.onload = function() {
-            if (this.status === 200) {
-                try {
-                    var categories = JSON.parse(this.responseText);
-                    var output = categories.map(function(cat) {
-                        return '<li><a href="category_pages.php?category_id=' + cat.category_id + '">' + cat.category_name + '</a></li>';
-                    }).join('');
-                    document.getElementById('categoryList').innerHTML = output;
-                    document.getElementById('categoryPopup').style.display = 'block';
-                } catch(e) {
-                    console.error('Error parsing JSON:', e);
-                }
-            } else {
-                console.error('Server returned status code ' + this.status);
-            }
-        };
-
-        xhr.onerror = function() {
-            console.error('Request failed');
-        };
-
-        xhr.send();
-    }
-</script>

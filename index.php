@@ -11,24 +11,20 @@ if (!isset($_SESSION['user_id']) || !checkUserRole('admin')) {
     exit;
 }
 
-// Initialize counts
+$pageTitle = "Dashboard"; 
 $newsCount = $galleryCount = $commentCount = 0;
 
 try {
-    // Get the count of gallery items
     $stmt = $pdo->query("SELECT COUNT(*) FROM pages");
     $galleryCount = $stmt->fetchColumn();
 
-    // Get the count of comments
     $stmt = $pdo->query("SELECT COUNT(*) FROM comments");
     $commentCount = $stmt->fetchColumn();
 
-    // Get the count of categories
     $stmt = $pdo->query("SELECT COUNT(*) FROM categories");
     $categoriesCount = $stmt->fetchColumn();
 
 } catch (PDOException $e) {
-    // Handle exceptions by logging and displaying an error message
     error_log("Database error: " . $e->getMessage());
     $error = "An error occurred while fetching data.";
 }
@@ -37,44 +33,41 @@ try {
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body >
 
+<?php include 'header.php'; ?>
 
-            <?php include 'navbar.php'; ?>
-
-
-        <main class="index_body">
-            <h1>Admin Dashboard</h1>
-
-            <div class="admin-statistics">
-
-                <div class="statistic">
-                    <a href="list_pages.php">Celestial Bodies: <?= $galleryCount; ?></a>
-                </div>
-
-                <div class="statistic">
-                    <a href="list_categories.php">Categories: <?= $categoriesCount; ?></a>
-                </div>
-                
-                <div class="statistic">
-                    <a href="list_comments.php">Comments: <?= $commentCount; ?></a>
-                </div>
+<body>
+    <?php include 'navbar.php'; ?>
+    <main class="container">
+        <section class="card">
+            <h2>Pages</h2>
+            <div>
+                <p>Total: <?= $galleryCount; ?></p>
+                <a class="btn btn-primary" href="list_pages.php" role="button">Manage</a>
             </div>
+        </section>
 
-            <div class="admin-links">
-                <a href="create_page.php">Create New</a>
-                <!-- Add more links as needed for other creation pages -->
+        <section class="card">
+            <h2>Categories</h2>
+            <div>
+                <p>Total: <?= $categoriesCount; ?></p>
+                <a class="btn btn-primary" href="list_categories.php" role="button">Manage</a>
             </div>
-        </main>
+        </section>
 
-        <footer>
-            <!-- Footer content -->
-        </footer>
+        <section class="card">
+            <h2>Comments</h2>
+            <div>
+                <p>Total: <?= $commentCount; ?></p>
+                <a class="btn btn-primary" href="list_comments.php" role="button">Manage</a>
+            </div>
+        </section>
+    </main>
+
+    <?php include 'footer.php'; ?>
+
+    <?php include 'scripts.php'; ?>
 
 </body>
+
 </html>

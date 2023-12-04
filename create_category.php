@@ -14,9 +14,10 @@ if (!isset($_SESSION['user_id']) || !checkUserRole('admin')) {
 $error = '';
 $success = '';
 $name = ''; 
+$pageTitle = "New Category"; 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = trim($_POST['name']);
+    $name = trim(filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING));
 
     if (empty($name)) {
         $error = 'Please enter a category name.';
@@ -39,22 +40,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Create New Category</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
+
+<?php include 'header.php'; ?>
+
 <body>
     <?php include 'navbar.php'; ?>
+    <main class="container create">
 
-    <main class="create">
-        <h1>Create New Category</h1>
-        
         <?php if ($error): ?>
-            <p class="error"><?= htmlspecialchars($error); ?></p>
+        <p class="text-danger mt-2"><?= htmlspecialchars($error); ?></p>
         <?php endif; ?>
         <?php if ($success): ?>
-            <p class="success"><?= htmlspecialchars($success); ?></p>
+        <p class="text-success mt-2"><?= htmlspecialchars($success); ?></p>
         <?php endif; ?>
 
         <form action="create_category.php" method="post">
@@ -62,13 +59,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <label for="name">Category Name:</label>
                 <input type="text" id="name" name="name" required value="<?= htmlspecialchars($name); ?>">
             </div>
-            
+
             <div>
-                <input type="submit" value="Create Category">
+                <input type="submit" value="Create Category" class="btn btn-primary mb-2 mt-2">
             </div>
         </form>
     </main>
+    <?php include 'footer.php'; ?>
+
+    <?php include 'scripts.php'; ?>
+
 </body>
-</html>
-</body>
+
 </html>

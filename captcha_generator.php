@@ -1,4 +1,6 @@
 <?php
+// captcha_generator.php
+
 session_start();
 
 $random_str = substr(md5(rand()), 0, 6);

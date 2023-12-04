@@ -11,6 +11,7 @@ if (!isset($_SESSION['user_id']) || !checkUserRole('admin')) {
     exit;
 }
 
+$pageTitle = "Pages"; 
 $pages = [];
 $sort = isset($_GET['sort']) ? $_GET['sort'] : 'title'; 
 $sort_order = isset($_GET['order']) && $_GET['order'] == 'desc' ? 'DESC' : 'ASC';
@@ -29,73 +30,80 @@ try {
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Pages List</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
+
+<?php include 'header.php'; ?>
+
 <body>
-    <header>
-        <?php include 'navbar.php'; ?>
-    </header>
-    <main class="main-content">
-        <h1>Pages List</h1>
-        <div class="admin-links">
-                <a href="create_page.php">Create New</a>
+    <?php include 'navbar.php'; ?>
+    <main class="container">
+        <div>
+            <a class="btn btn-primary mb-2 mt-2" role="button" href="create_page.php">Create New</a>
         </div>
         <?php if (!empty($pages)): ?>
-            <table class="pages-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>
-                            Title
-                            <a href="?sort=title&order=asc" class="<?= ($current_sort == 'titleASC') ? 'current-sort' : '' ?>"></a>
-                            <a href="?sort=title&order=desc" class="<?= ($current_sort == 'titleDESC') ? 'current-sort' : '' ?>"></a>
-                        </th>
-                        <th>Category</th>
-                        <th>Content</th>
-                        <th>
-                            Creation Time
-                            <a href="?sort=creation_time&order=asc" class="<?= ($current_sort == 'creation_timeASC') ? 'current-sort' : '' ?>"></a>
-                            <a href="?sort=creation_time&order=desc" class="<?= ($current_sort == 'creation_timeDESC') ? 'current-sort' : '' ?>"></a>
-                        </th>
-                        <th>
-                            Last Modified
-                            <a href="?sort=last_modified_time&order=asc" class="<?= ($current_sort == 'last_modified_timeASC') ? 'current-sort' : '' ?>"></a>
-                            <a href="?sort=last_modified_time&order=desc" class="<?= ($current_sort == 'last_modified_timeDESC') ? 'current-sort' : '' ?>"></a>
-                        </th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($pages as $index => $page): ?>
-                        <tr>
-                            <td><?= $index + 1; ?></td>
-                            <td><a href="view.php?page_id=<?= $page['page_id']; ?>"><?= htmlspecialchars($page['title']); ?></a></td>
-                            <td><?= htmlspecialchars($page['category_name']); ?></td>
-                            <td>
-                                <?= mb_substr($page['content'], 0, 200); ?>
-                                <?php if(mb_strlen($page['content']) > 200): ?>
-                                    ...<a href="view.php?page_id=<?= $page['page_id'];?>">read more</a>
-                                <?php endif; ?>
-                            </td>
-                            <td><?= htmlspecialchars($page['creation_time']); ?></td>
-                            <td><?= htmlspecialchars($page['last_modified_time']); ?></td>
-                            <td>
-                                <a href="edit_page.php?page_id=<?= $page['page_id']; ?>" class="edit-btn">Edit</a>
-                                <a href="delete_page.php?page_id=<?= $page['page_id']; ?>" class="delete-btn" onclick="return confirm('Are you sure you want to delete this page?');">Delete</a>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>
+                        Title
+                        <a href="?sort=title&order=asc"
+                            class="<?= ($current_sort == 'titleASC') ? 'current-sort' : '' ?>"></a>
+                        <a href="?sort=title&order=desc"
+                            class="<?= ($current_sort == 'titleDESC') ? 'current-sort' : '' ?>"></a>
+                    </th>
+                    <th>Category</th>
+                    <th>Content</th>
+                    <th>
+                        Creation Time
+                        <a href="?sort=creation_time&order=asc"
+                            class="<?= ($current_sort == 'creation_timeASC') ? 'current-sort' : '' ?>"></a>
+                        <a href="?sort=creation_time&order=desc"
+                            class="<?= ($current_sort == 'creation_timeDESC') ? 'current-sort' : '' ?>"></a>
+                    </th>
+                    <th>
+                        Last Modified
+                        <a href="?sort=last_modified_time&order=asc"
+                            class="<?= ($current_sort == 'last_modified_timeASC') ? 'current-sort' : '' ?>"></a>
+                        <a href="?sort=last_modified_time&order=desc"
+                            class="<?= ($current_sort == 'last_modified_timeDESC') ? 'current-sort' : '' ?>"></a>
+                    </th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($pages as $index => $page): ?>
+                <tr>
+                    <td><?= $index + 1; ?></td>
+                    <td><a href="view.php?page_id=<?= $page['page_id']; ?>"><?= htmlspecialchars($page['title']); ?></a>
+                    </td>
+                    <td><?= htmlspecialchars($page['category_name']); ?></td>
+                    <td>
+                        <?= mb_substr($page['content'], 0, 120); ?>
+                        <?php if(mb_strlen($page['content']) > 120): ?>
+                        ...<a href="view.php?page_id=<?= $page['page_id'];?>">read more</a>
+                        <?php endif; ?>
+                    </td>
+                    <td><?= htmlspecialchars($page['creation_time']); ?></td>
+                    <td><?= htmlspecialchars($page['last_modified_time']); ?></td>
+                    <td>
+                        <a href="edit_page.php?page_id=<?= $page['page_id']; ?>" class="btn btn-success"
+                            role="button">Edit</a>
+                        <a href="delete_page.php?page_id=<?= $page['page_id']; ?>" class="btn btn-danger" role="button"
+                            onclick="return confirm('Are you sure you want to delete this page?');">Delete</a>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
         <?php else: ?>
-            <div class="admin-links">
-                <a href="create_page.php">Create New</a>
-            </div>
-            <p class="no-data">No celestial bodies found.</p>
+        <p cclass="alert alert-danger mt-5" role="alert">No Pages found.</p>
         <?php endif; ?>
     </main>
+
+    <?php include 'footer.php'; ?>
+
+    <?php include 'scripts.php'; ?>
+
 </body>
+
 </html>

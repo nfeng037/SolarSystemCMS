@@ -10,7 +10,13 @@ if (!isset($_SESSION['user_id']) || !checkUserRole('admin')) {
 
 $error = '';
 $success = '';
-$comment_id = isset($_GET['comment_id']) ? $_GET['comment_id'] : null;
+$comment_id = filter_input(INPUT_GET, 'comment_id', FILTER_VALIDATE_INT); // Validate comment_id
+$pageTitle = "Edit Comment"; 
+
+if (!$comment_id) {
+    $error = 'Invalid comment id.';
+}
+
 
 if ($comment_id) {
     $stmt = $pdo->prepare("SELECT * FROM comments WHERE comment_id = :comment_id");
@@ -21,7 +27,7 @@ if ($comment_id) {
         $guest_name = $comment['guest_name'];
         $content = $comment['content'];
     } else {
-        $error = 'comment not found.';
+        $error = 'Comment not found.';
     }
 }
 
@@ -52,26 +58,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $comment_id) {
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Edit Comment</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
+
+<?php include 'header.php'; ?>
+
 <body>
-    <header>
-            <?php include 'navbar.php'; ?>
-    </header>
-    <main class="edit">
-        <h1>Edit Comment</h1>
-        
+    <?php include 'navbar.php'; ?>
+    <main class="container create">
+
         <?php if ($error): ?>
-            <p class="error"><?= htmlspecialchars($error); ?></p>
+        <p class="alert alert-danger" role="alert"><?= htmlspecialchars($error); ?></p>
         <?php endif; ?>
         <?php if ($success): ?>
-            <p class="success"><?= htmlspecialchars($success); ?></p>
+        <p class="text-success mt-2"><?= htmlspecialchars($success); ?></p>
         <?php endif; ?>
 
-        <form class="edit_form" action="edit_comment.php?comment_id=<?= htmlspecialchars($comment_id); ?>" method="post">
+        <form action="edit_comment.php?comment_id=<?= htmlspecialchars($comment_id); ?>" method="post">
             <div>
                 <label for="name">Guest Name:</label>
                 <input type="text" id="name" name="name" required value="<?= htmlspecialchars($guest_name); ?>">
@@ -79,13 +80,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $comment_id) {
 
             <div>
                 <label for="name">Content:</label>
-                <textarea class="edit_textarea" name="comment_content" required><?= htmlspecialchars($content) ?></textarea>            
+                <textarea class="form-control" name="comment_content"
+                    required><?= htmlspecialchars($content) ?></textarea>
             </div>
-            
+
             <div>
-                <input type="submit" value="Update comment">
+                <input type="submit" value="Update comment" class="btn btn-primary mb-2 mt-2">
             </div>
         </form>
     </main>
+    <?php include 'footer.php'; ?>
+
+    <?php include 'scripts.php'; ?>
+
 </body>
+
 </html>

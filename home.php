@@ -1,62 +1,64 @@
 <?php
 include 'db_connect.php';
 
-// Prepare a SQL statement to fetch all planet data
+$pageTitle = "Cosmos Explorer"; 
+
 $stmt = $pdo->prepare("SELECT * FROM pages");
 $stmt->execute();
 
-// Fetch all the planet records
 $pages = $stmt->fetchAll();
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cosmos Explorer</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body  class="user">
-  <?php include 'home_navbar.php'; ?>
-  <main>
-    <!-- Main banner -->
-    <section class="intro">
-      <h1> Cosmos Explorer Welcomes You</h1>
-      <a href='all_pages.php' class="start-button">Start Adventure</a>
-    </section>
-    <!-- Gallery -->
-    <section class="gallery">
-      <h2>Gallery</h2>
-      <div class="article-container">
-          <?php if (!empty($pages)): ?>
-              <?php 
+<?php include 'header.php'; ?>
+
+<body class="p-3 w-75 mx-auto border-0 bd-example m-0 border-0 bg-black">
+    <header>
+        <?php include 'home_navbar.php'; ?>
+    </header>
+    <main>
+        <section class="intro">
+            <h1> Cosmos Explorer Welcomes You</h1>
+            <a href='all_pages.php' class="btn btn-light">Start Adventure</a>
+        </section>
+        <section class="gallery">
+            <h2>Gallery</h2>
+            <div class="article-container">
+                <?php if (!empty($pages)): ?>
+                <?php 
                   $counter = 0; 
                   foreach ($pages as $page):
-                      if ($counter >= 8) break; 
+                      if ($counter >= 6) break; 
               ?>
-                  <article>
-                    <a href="view.php?page_id=<?= $page['page_id']; ?>"> 
-                      <img src="<?= htmlspecialchars($page['image_url']); ?>" alt="<?= htmlspecialchars($page['title']); ?>">
+                <article>
+                    <a href="view.php?page_id=<?= $page['page_id']; ?>">
+                        <img src="<?= htmlspecialchars($page['image_url']); ?>"
+                            alt="<?= htmlspecialchars($page['title']); ?>">
                     </a>
                     <h3><?= htmlspecialchars($page['title']); ?></h3>
                     <p>
-                        <?= mb_substr(($page['content']), 0, 120); ?> 
+                        <?= mb_substr(($page['content']), 0, 120); ?>
                         <?php if (mb_strlen($page['content']) > 120): ?>
-                            ... <a href="view.php?page_id=<?= $page['page_id']; ?>">read more</a> 
+                        ... <a href="view.php?page_id=<?= $page['page_id']; ?>">read more</a>
                         <?php endif; ?>
                     </p>
-                  </article>
-              <?php 
+                </article>
+                <?php 
                   $counter++; 
                   endforeach; 
               ?>
-          <?php else: ?>
-              <p>No result found.</p>
-          <?php endif; ?>
-      </div>
-      </section>
-  </main>
+                <?php else: ?>
+                <p>No result found.</p>
+                <?php endif; ?>
+            </div>
+        </section>
+    </main>
+
+    <?php include 'footer.php'; ?>
+
+    <?php include 'scripts.php'; ?>
 
 </body>
+
 </html>

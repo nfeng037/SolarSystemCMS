@@ -3,6 +3,7 @@ session_start();
 require 'db_connect.php'; 
 
 $error = '';
+$pageTitle = "Login";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['username'], $_POST['password'])) {
     $username = trim($_POST['username']);
@@ -35,13 +36,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['username'], $_POST['pa
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
+
+<?php include 'header.php'; ?>
+
 <body>
+
     <main class="login-container">
         <form action="login.php" method="post" class="login-form">
             <label for="username">Username:</label>
@@ -50,11 +49,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['username'], $_POST['pa
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required>
             <br>
-            <input type="submit" value="Login">
+            <input type="submit" value="Login" class="btn btn-dark">
+            <?php if (!empty($error)): ?>
+            <p class="text-danger mt-2"><?= $error; ?></p>
+            <?php endif; ?>
         </form>
-        <?php if (!empty($error)): ?>
-        <p><?= $error; ?></p>
-        <?php endif; ?>
     </main>
+    <?php include 'scripts.php'; ?>
+
 </body>
+
 </html>

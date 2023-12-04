@@ -6,6 +6,8 @@ session_start();
 require 'db_connect.php';
 require 'check_access.php'; 
 
+$pageTitle = "Categories"; 
+
 if (!isset($_SESSION['user_id']) || !checkUserRole('admin')) {
     header("Location: login.php");
     exit;
@@ -21,53 +23,54 @@ try {
 }
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Categories List</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
+
+<?php include 'header.php'; ?>
+
 <body>
-    <header>
-        <?php include 'navbar.php'; ?>
-    </header>
-    <main class="main-content">
-        <h1>Categories List</h1>
-        <div class="admin-links">
-                <a href="create_category.php">Create New</a>
+    <?php include 'navbar.php'; ?>
+    <main class="container">
+        <div>
+            <a class="btn btn-primary mb-2 mt-2" role="button" href="create_category.php">Create New</a>
         </div>
-        
         <?php if (!empty($categories)): ?>
-            <table class="pages-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($categories as $index => $category): ?>
-                        <tr>
-                            <td><?= $index + 1; ?></td>
-                            <td>
-                                <a href="category_pages.php?category_id=<?= $category['category_id']; ?>">
-                                    <?= htmlspecialchars($category['category_name']); ?>
-                                </a>
-                            </td>
-                            <td>
-                                <a href="edit_category.php?category_id=<?= $category['category_id']; ?>" class="edit-btn">Edit</a>
-                                <a href="delete_category.php?category_id=<?= $category['category_id']; ?>" class="delete-btn" onclick="return confirm('Are you sure you want to delete this category?');">Delete</a>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($categories as $index => $category): ?>
+                <tr>
+                    <td><?= $index + 1; ?></td>
+                    <td>
+                        <a href="category_pages.php?category_id=<?= $category['category_id']; ?>">
+                            <?= htmlspecialchars($category['category_name']); ?>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="edit_category.php?category_id=<?= $category['category_id']; ?>" class="btn btn-success"
+                            role="button">Edit</a>
+                        <a href="delete_category.php?category_id=<?= $category['category_id']; ?>"
+                            class="btn btn-danger" role="button"
+                            onclick="return confirm('Are you sure you want to delete this category?');">Delete</a>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
         <?php else: ?>
-            <p class="no-data">No categories found.</p>
+        <p class="alert alert-danger mt-5" role="alert">No categories found.</p>
         <?php endif; ?>
     </main>
+    <?php include 'footer.php'; ?>
+
+    <?php include 'scripts.php'; ?>
+
 </body>
+
 </html>

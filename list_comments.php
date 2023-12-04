@@ -9,6 +9,8 @@ if (!isset($_SESSION['user_id']) || !checkUserRole('admin')) {
     exit;
 }
 
+$pageTitle = "Comments"; 
+
 try {
     $stmt = $pdo->prepare("SELECT * FROM comments ORDER BY creation_time DESC");
     $stmt->execute();
@@ -21,21 +23,15 @@ try {
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Manage Comments</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
+
+<?php include 'header.php'; ?>
+
 <body>
-    <header>
-        <?php include 'navbar.php'; ?>
-    </header>
-    <main class="main-content">
-        <h1>Manage Comments</h1>
-        
+    <?php include 'navbar.php'; ?>
+    <main class="container create">   
         <?php if (!empty($comments)): ?>
-            <table class="pages-table">
-                <thead>
+            <table class="table table-hover">
+                <thead class="table-dark">
                     <tr>
                         <th>#</th>
                         <th>Creation Time</th>
@@ -52,16 +48,20 @@ try {
                             <td><?= $comment['guest_name']; ?></a></td>
                             <td><?= $comment['content']; ?></a></td>
                             <td>
-                                <a href="edit_comment.php?comment_id=<?= $comment['comment_id']; ?>" class="edit-btn">Edit</a>
-                                <a href="delete_comment.php?comment_id=<?= $comment['comment_id']; ?>" class="delete-btn" onclick="return confirm('Are you sure you want to delete this comment?');">Delete</a>
+                                <a href="edit_comment.php?comment_id=<?= $comment['comment_id']; ?>" class="btn btn-success" role="button">Edit</a>
+                                <a href="delete_comment.php?comment_id=<?= $comment['comment_id']; ?>" class="btn btn-danger" role="button" onclick="return confirm('Are you sure you want to delete this comment?');">Delete</a>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
         <?php else: ?>
-            <p class="no-data">No comment found.</p>
+            <p class="alert alert-danger mt-5" role="alert">No comments found.</p>
         <?php endif; ?>
     </main>
+    <?php include 'footer.php'; ?>
+
+    <?php include 'scripts.php'; ?>
+
 </body>
 </html>

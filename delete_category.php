@@ -7,7 +7,6 @@ session_start();
 require 'db_connect.php'; 
 require 'check_access.php'; 
 
-// Check if the user is logged in and is an admin
 if (!isset($_SESSION['user_id']) || !checkUserRole('admin')) {
     header("Location: login.php");
     exit;
@@ -28,7 +27,7 @@ if (isset($_GET['category_id'])) {
         exit;
     } catch (PDOException $e) {
         $pdo->rollback();
-        error_log("Error deleting category: " . $e->getMessage()); // Log the exception message
+        error_log("Error deleting category: " . $e->getMessage()); 
         exit;
     }
 } else {

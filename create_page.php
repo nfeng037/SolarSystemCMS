@@ -8,6 +8,8 @@ require 'check_access.php';
 require './lib/htmlpurifier-4.15.0/library/HTMLPurifier.auto.php';
 require_once 'image_functions.php';
 
+$pageTitle = "New Page"; 
+
 // Validation of User Role and Session
 if (!isset($_SESSION['user_id']) || !checkUserRole('admin')) {
     header("Location: login.php");
@@ -100,23 +102,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Create New Page</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-</head>
+
+<?php include 'header.php'; ?>
+
 <body>
     <?php include 'navbar.php'; ?>
+    <main class="container create">
 
-    <main class="create">
-        <h1>Create New Page</h1>
-        
         <?php if ($error): ?>
-            <p class="error"><?= $error; ?></p>
+        <p class="alert alert-danger" role="alert"><?= $error; ?></p>
         <?php endif; ?>
         <?php if ($success): ?>
-            <p class="success"><?= $success; ?></p>
+        <p class="text-success mt-2"><?= $success; ?></p>
         <?php endif; ?>
 
         <form id="myForm" action="create_page.php" method="post" enctype="multipart/form-data">
@@ -124,58 +121,61 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <label for="name">Name:</label>
                 <input type="text" id="name" name="name" required value="<?= htmlspecialchars($title); ?>">
             </div>
-            
+
             <div>
                 <label for="category">Category:</label>
-                <select id="category" name="category" required>
+                <select id="category" name="category">
                     <?php foreach ($categories as $category): ?>
-                        <option value="<?= $category['category_id']; ?>">
-                            <?= htmlspecialchars($category['category_name']); ?>
-                        </option>
+                    <option value="<?= $category['category_id']; ?>">
+                        <?= htmlspecialchars($category['category_name']); ?>
+                    </option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            
+
             <div>
-                <label for="description">Description:</label>
+                <p>Description:</p>
                 <div id="editor-container"></div>
                 <input type="hidden" name="description" id="hidden-description">
             </div>
-            
+
             <div>
                 <label for="image">Upload Image (optional):</label>
                 <input type="file" id="image" name="image">
             </div>
 
-            
+
             <div>
-                <input type="submit" value="Create Page">
+                <input type="submit" value="Create Page" class="btn btn-primary mb-2 mt-2">
             </div>
         </form>
     </main>
 
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script>
-        var quill = new Quill('#editor-container', {
-            theme: 'snow'
+    var quill = new Quill('#editor-container', {
+        theme: 'snow'
+    });
+    var storedContent = '<?= addslashes($content); ?>';
+    if (storedContent) {
+        quill.root.innerHTML = storedContent;
+    }
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+        var form = document.querySelector('#myForm');
+        form.addEventListener('submit', function(e) {
+
+            var description = document.querySelector('#hidden-description');
+            description.value = quill.root.innerHTML;
+            console.log('Captured description:', description.value);
         });
-        var storedContent = '<?= addslashes($content); ?>';
-        if (storedContent) {
-            quill.root.innerHTML = storedContent;
-        }
-
-        document.addEventListener('DOMContentLoaded', (event) => {
-            var form = document.querySelector('#myForm');
-            form.addEventListener('submit', function(e) {
-
-                var description = document.querySelector('#hidden-description');
-                description.value = quill.root.innerHTML;
-                console.log('Captured description:', description.value);
-            });
-        });
-
-
+    });
     </script>
 
+    <?php include 'footer.php'; ?>
+
+    <?php include 'scripts.php'; ?>
+
 </body>
+
 </html>

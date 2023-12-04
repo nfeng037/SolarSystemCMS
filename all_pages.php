@@ -1,51 +1,54 @@
 <?php
+// all_pages.php
 include 'db_connect.php';
 
-// Prepare a SQL statement to fetch all planet data
+$pageTitle = "Gallery"; 
+
 $stmt = $pdo->prepare("SELECT * FROM pages");
 $stmt->execute();
 
-// Fetch all the planet records
 $pages = $stmt->fetchAll();
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gallery</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body class="user">
-    <?php include 'home_navbar.php'; ?>
-    <main>
-        <section class="gallery">
-        <h2>Gallery</h2>
-        <div class="article-container">
-            <?php if (!empty($pages)): ?>
-                <?php foreach ($pages as $page): ?>
-                    <article>
-                        <?php if (!empty($page['image_url'])): ?>
-                            <a href="view.php?page_id=<?= htmlspecialchars($page['page_id']); ?>"> 
-                                <img src="<?= htmlspecialchars($page['image_url']); ?>" alt="<?= htmlspecialchars($page['title']); ?>">
-                            </a>
-                        <?php endif; ?>
 
-                        <h3><a href="view.php?page_id=<?= htmlspecialchars($page['page_id']); ?>"><?= htmlspecialchars($page['title']); ?></a> </h3>
-                        <p>
-                            <?= mb_substr($page['content'], 0, 120); ?> 
-                            <?php if (mb_strlen($page['content']) > 120): ?>
-                                ... <a href="view.php?page_id=<?= htmlspecialchars($page['page_id']); ?>">read more</a> 
-                            <?php endif; ?>
-                        </p>
-                    </article>
-                <?php endforeach; ?>
+<?php include 'header.php'; ?>
+
+<body class="p-3 w-75 mx-auto border-0 bd-example m-0 border-0 bg-black">
+    <header>
+        <?php include 'home_navbar.php'; ?>
+    </header>
+    <main>
+        <div class="d-flex flex-wrap justify-content-start">
+            <?php if (!empty($pages)): ?>
+            <?php foreach ($pages as $page): ?>
+            <article class="card bg-dark m-2" style="width: 18rem;">
+                <?php if (!empty($page['image_url'])): ?>
+                <img class="card-img-top" src="<?= htmlspecialchars($page['image_url']); ?>"
+                    alt="<?= htmlspecialchars($page['title']); ?>">
+                <?php endif; ?>
+                <div class="card-body">
+                    <h5 class="card-title text-white"><?= htmlspecialchars($page['title']); ?></h5>
+                    <div class="card-text text-white"><?= mb_substr($page['content'], 0, 130); ?>
+                        <?php if (mb_strlen($page['content']) > 130): ?>
+                        ...
+                        <?php endif; ?>
+                    </div>
+                    <a href="view.php?page_id=<?= htmlspecialchars($page['page_id']); ?>" class="btn btn-primary">Read
+                        More</a>
+                </div>
+            </article>
+            <?php endforeach; ?>
             <?php else: ?>
-                <p>No result found.</p>
+            <p>No result found.</p>
             <?php endif; ?>
         </div>
-        </section>
     </main>
+    <?php include 'footer.php'; ?>
+
+    <?php include 'scripts.php'; ?>
+
 </body>
+
 </html>

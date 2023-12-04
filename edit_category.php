@@ -11,10 +11,18 @@ if (!isset($_SESSION['user_id']) || !checkUserRole('admin')) {
     exit;
 }
 
+$pageTitle = "Edit Category";
 $error = '';
 $success = '';
 $category_id = isset($_GET['category_id']) ? $_GET['category_id'] : null;
 $category_name = '';
+
+$category_id = filter_input(INPUT_GET, 'category_id', FILTER_VALIDATE_INT); // Validate category_id
+
+
+if (!$category_id) {
+    $error = 'Invalid category ID.';
+} 
 
 if ($category_id) {
     $stmt = $pdo->prepare("SELECT category_name FROM categories WHERE category_id = :category_id");
@@ -53,35 +61,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $category_id) {
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Edit Category</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
+
+<?php include 'header.php'; ?>
+
 <body>
-    <header>
-            <?php include 'navbar.php'; ?>
-    </header>
-    <main class="edit">
-        <h1>Edit Category</h1>
-        
+    <?php include 'navbar.php'; ?>
+    <main class="container create">
+
         <?php if ($error): ?>
-            <p class="error"><?= htmlspecialchars($error); ?></p>
+        <p class="alert alert-danger" role="alert"><?= htmlspecialchars($error); ?></p>
         <?php endif; ?>
         <?php if ($success): ?>
-            <p class="success"><?= htmlspecialchars($success); ?></p>
+        <p cclass="text-success mt-2"><?= htmlspecialchars($success); ?></p>
         <?php endif; ?>
 
-        <form class="edit_form" action="edit_category.php?category_id=<?= htmlspecialchars($category_id); ?>" method="post">
+        <form class="edit_form" action="edit_category.php?category_id=<?= htmlspecialchars($category_id); ?>"
+            method="post">
             <div>
                 <label for="name">Category Name:</label>
                 <input type="text" id="name" name="name" required value="<?= htmlspecialchars($category_name); ?>">
             </div>
-            
+
             <div>
-                <input type="submit" value="Update Category">
+                <input type="submit" value="Update Category" class="btn btn-primary mb-2 mt-2">
             </div>
         </form>
     </main>
 </body>
+
 </html>

@@ -29,45 +29,53 @@ try {
 } catch (PDOException $e) {
     $error = "Database error: " . $e->getMessage();
 }
+
+$pageTitle = $category_name; 
+
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title><?= htmlspecialchars($category_name) ?></title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body class="user">
-    <?php include 'home_navbar.php'; ?>
-    <main class="main-content">
-        <section class="gallery">
-            <h1><?= htmlspecialchars($category_name) ?></h1>
-            <div class="article-container">
+
+<?php include 'header.php'; ?>
+
+<body class="p-3 w-75 mx-auto border-0 bd-example m-0 border-0 bg-black">
+    <header>
+        <?php include 'home_navbar.php'; ?>
+    </header>
+    <main>
+        <section>
+            <h2 class="text-white m-2"><?= htmlspecialchars($category_name) ?></h2>
+            <div class="d-flex flex-wrap justify-content-start">
                 <?php if (!empty($pages)): ?>
-                    <?php 
-                            foreach ($pages as $page):
-                        ?>
-                            <article>
-                                <a href="view.php?page_id=<?= $page['page_id']; ?>"> 
-                                <img src="<?= htmlspecialchars($page['image_url']); ?>" alt="<?= htmlspecialchars($page['title']); ?>">
-                                </a>
-                                <h3><?= htmlspecialchars($page['title']); ?></h3>
-                                <p>
-                                    <?= mb_substr(($page['content']), 0, 120); ?> 
-                                    <?php if (mb_strlen($page['content']) > 120): ?>
-                                        ... <a href="view.php?page_id=<?= $page['page_id']; ?>">read more</a> 
-                                    <?php endif; ?>
-                                </p>
-                            </article>
-                        <?php 
-                            endforeach; 
-                        ?>
+                <?php foreach ($pages as $page):?>
+                <article class="card bg-dark m-2" style="width: 17rem;">
+                    <?php if (!empty($page['image_url'])): ?>
+                    <img class="card-img-top" src="<?= htmlspecialchars($page['image_url']); ?>"
+                        alt="<?= htmlspecialchars($page['title']); ?>">
+                    <?php endif; ?>
+                    <div class="card-body">
+                        <h5 class="card-title text-white"><?= htmlspecialchars($page['title']); ?></h5>
+                        <div class="card-text text-white"><?= mb_substr($page['content'], 0, 130); ?>
+                            <?php if (mb_strlen($page['content']) > 130): ?>
+                            ...
+                            <?php endif; ?>
+                        </div>
+                        <a href="view.php?page_id=<?= htmlspecialchars($page['page_id']); ?>"
+                            class="btn btn-primary">Read More</a>
+                    </div>
+                </article>
+                <?php endforeach;?>
                 <?php else: ?>
-                    <p class="no-data">No pages found for this category.</p>
+                <p class="alert alert-danger mt-5" role="alert">No pages found for this category.</p>
                 <?php endif; ?>
             </div>
         </section>
     </main>
+    <?php include 'footer.php'; ?>
+
+    <?php include 'scripts.php'; ?>
+
 </body>
+
 </html>

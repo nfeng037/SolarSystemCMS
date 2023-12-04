@@ -16,11 +16,22 @@ if (!isset($_SESSION['user_id']) || !checkUserRole('admin')) {
 $error = '';
 $success = '';
 
-$page_id = $_GET['page_id'] ?? $_SESSION['page_id_to_edit'];
+$pageTitle = "Edit Page"; 
+
+// Validate page_id
+$page_id = filter_input(INPUT_GET, 'page_id', FILTER_VALIDATE_INT);
+if (!$page_id) {
+    $error = 'Invalid page id.';
+}
 
 $stmt = $pdo->prepare("SELECT * FROM pages WHERE page_id = :page_id");
 $stmt->execute([':page_id' => $page_id]);
 $page = $stmt->fetch(PDO::FETCH_ASSOC);
+
+
+if (!$page) {
+    $error = 'The page was not found.';
+}
 
 $stmt = $pdo->query("SELECT category_id, category_name FROM categories");
 $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -35,6 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $title = $_POST['name'] ?? $title;
     $content = $_POST['description'] ?? $content;
 
+    // Using HTMLPurifier to prevent XSS attacks.
     $config = HTMLPurifier_Config::createDefault();
     $purifier = new HTMLPurifier($config);
     $clean_html = $purifier->purify($description);
@@ -98,14 +110,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             $error = "Error: File does not exist.";
         }
-
     }
 
     if (!$error) {
         $pdo->beginTransaction();
 
         try {
-            // Update page details
             $stmt = $pdo->prepare("UPDATE pages SET title = :title, content = :content, category_id = :category_id WHERE page_id = :page_id");
             $stmt->execute([
                 ':title' => $name,
@@ -121,14 +131,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     ':page_id' => $page_id
                 ]);
 
-
                 $updateImageStmt = $pdo->prepare("UPDATE images SET file_name = :file_name WHERE page_id = :page_id");
                 $updateImageStmt->execute([
                     ':file_name' => $resizedRelativePath,
                     ':page_id' => $page_id
                 ]);
             }
-            
 
             $pdo->commit();
             $success = 'Page updated successfully.';
@@ -141,59 +149,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 }
-
 ?>
-
-
-
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Edit Page - <?= $page['title'] ?></title>
-    <link rel="stylesheet" href="styles.css">
-    <!-- Include Quill library for rich text editor -->
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-</head>
+
+<?php include 'header.php'; ?>
+
 <body>
     <?php include 'navbar.php'; ?>
-
-    <main class="edit">
-        <h1>Edit Page - <?= $page['title'] ?></h1>
-        
-        <!-- Error or success messages -->
+    <main class="container create">
+        <div class="d-flex justify-content-center">
+            <h1>Page - <?= $page['title'] ?></h1>
+        </div>
         <?php if ($error): ?>
-            <p class="error"><?= $error; ?></p>
+        <p class="alert alert-danger" role="alert"><?= $error; ?></p>
         <?php endif; ?>
         <?php if ($success): ?>
-            <p class="success"><?= $success; ?></p>
+        <p class="text-success mt-2"><?= $success; ?></p>
         <?php endif; ?>
 
-        <form class="edit_form" id="editForm" action="edit_page.php?page_id=<?= $page_id; ?>" method="post" enctype="multipart/form-data">
+        <form class="edit_form" id="editForm" action="edit_page.php?page_id=<?= $page_id; ?>" method="post"
+            enctype="multipart/form-data">
             <div>
                 <label for="name">Name:</label>
                 <input type="text" id="name" name="name" required value="<?= htmlspecialchars($title); ?>">
             </div>
-            
+
             <div>
                 <label for="category">Category:</label>
-                <select id="category" name="category" required>
+                <select id="category" name="category">
                     <?php foreach ($categories as $category): ?>
-                        <option value="<?= $category['category_id']; ?>" <?php if ($category['category_id'] == $page['category_id']) echo 'selected'; ?>>
-                            <?= htmlspecialchars($category['category_name']); ?>
-                        </option>
+                    <option value="<?= $category['category_id']; ?>"
+                        <?php if ($category['category_id'] == $page['category_id']) echo 'selected'; ?>>
+                        <?= htmlspecialchars($category['category_name']); ?>
+                    </option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            
+
             <div>
-                <label for="description">Description:</label>
-                <!-- Include the Quill editor container -->
+                <p>Description:</p>
                 <div id="editor-container"><?= htmlspecialchars($content); ?></div>
-                <input type="hidden" name="description" id="hidden-description" value="<?= htmlspecialchars($content); ?>">
+                <input type="hidden" name="description" id="hidden-description"
+                    value="<?= htmlspecialchars($content); ?>">
             </div>
-            
+
             <div>
                 <label for="image">Change Image (optional):</label>
                 <input type="file" id="image" name="image">
@@ -201,36 +202,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <div>
                 <?php if (!empty($page['image_url'])): ?>
-                    <label for="delete_image">Delete Current Image:</label>
-                    <input type="checkbox" id="delete_image" name="delete_image" value="1">
-                    <img src="<?= htmlspecialchars($page['image_url']); ?>" alt="Current Image" class="edit-image-preview">
+                <label for="delete_image">Delete Current Image:</label>
+                <input type="checkbox" id="delete_image" name="delete_image" value="1">
+                <img src="<?= htmlspecialchars($page['image_url']); ?>" alt="Current Image" class="edit-image-preview">
                 <?php endif; ?>
             </div>
 
             <div>
-                <input type="submit" value="Update Page">
+                <input class="btn btn-primary mb-2 mt-2" type="submit" value="Update Page">
+                <a href="delete_page.php?page_id=<?= $page['page_id']; ?>" class="btn btn-danger ml-3" role="button"
+                    onclick="return confirm('Are you sure you want to delete this page?');">Delete</a>
             </div>
         </form>
-        <a href="delete_page.php?page_id=<?= $page['page_id']; ?>" class="delete-btn" onclick="return confirm('Are you sure you want to delete this page?');">Delete</a>
     </main>
 
-    <!-- Include Quill JS for the rich text editor -->
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script>
-        var quill = new Quill('#editor-container', {
-            theme: 'snow'
-        });
+    var quill = new Quill('#editor-container', {
+        theme: 'snow'
+    });
 
-        quill.root.innerHTML = '<?= addslashes($content); ?>';
+    quill.root.innerHTML = '<?= addslashes($content); ?>';
 
-        document.addEventListener('DOMContentLoaded', (event) => {
-            var form = document.querySelector('#editForm');
-            form.onsubmit = function(e) {
-                var description = document.querySelector('#hidden-description');
-                description.value = quill.root.innerHTML;
-            };
-        });
+    document.addEventListener('DOMContentLoaded', (event) => {
+        var form = document.querySelector('#editForm');
+        form.onsubmit = function(e) {
+            var description = document.querySelector('#hidden-description');
+            description.value = quill.root.innerHTML;
+        };
+    });
     </script>
 
+    <?php include 'footer.php'; ?>
+
+    <?php include 'scripts.php'; ?>
+
 </body>
+
 </html>
